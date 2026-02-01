@@ -478,4 +478,49 @@ END:VCALENDAR`;
         const card = document.getElementById('card');
         const glare = document.getElementById('cardGlare');
         document.addEventListener('mousemove', (e) => {
-            const centerX
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const rotateX = ((e.clientY - centerY) / centerY) * -10;
+            const rotateY = ((e.clientX - centerX) / centerX) * 10;
+            card.style.transform = "perspective(1000px) rotateX("+rotateX+"deg) rotateY("+rotateY+"deg)";
+            glare.style.background = "linear-gradient("+(rotateY * 10 + 115)+"deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)";
+        });
+    <\/script>
+</body>
+</html>`;
+            const blob = new Blob([htmlContent], {type: 'text/html'});
+            const a = document.createElement('a');
+            a.download = `LiveCard_${guest}.html`;
+            a.href = URL.createObjectURL(blob);
+            a.click();
+        }
+
+        // Gyroscope / Mouse Tilt Effect (Editor)
+        function initTilt() {
+            const card = document.getElementById('card');
+            const glare = document.getElementById('cardGlare');
+            const container = document.querySelector('.preview-panel');
+
+            container.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; 
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                glare.style.background = `linear-gradient(${rotateY * 10 + 115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
+            });
+
+            container.addEventListener('mouseleave', () => {
+                card.style.transform = `rotateX(0) rotateY(0)`;
+                glare.style.background = `linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%)`;
+            });
+        }
+    </script>
+</body>
+</html>
