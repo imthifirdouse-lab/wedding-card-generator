@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Luxe Wedding Token 2026</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -45,7 +45,6 @@
         /* --- PREVIEW --- */
         .preview-panel { 
             flex: 1; 
-            /* Default Fallback */
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000); 
             background-size: auto, cover; background-position: center; background-repeat: no-repeat;
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
@@ -104,7 +103,7 @@
         .b-time { font-size: 11px; font-weight: bold; color: #d4af37; width: 60px; }
         .b-event { font-size: 12px; font-family: 'Montserrat', sans-serif; opacity: 0.9; }
 
-        /* --- THEMES (ALL 23 INCLUDED) --- */
+        /* --- THEMES --- */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
@@ -182,14 +181,25 @@
         /* Dock */
         .guest-dock { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); 
-            display: flex; gap: 12px; z-index: 100; 
-            background: rgba(0,0,0,0.85); padding: 12px; border-radius: 40px; 
+            display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 400px; justify-content: center;
+            background: rgba(0,0,0,0.85); padding: 10px; border-radius: 40px; 
             backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
         }
         .guest-dock.active { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .dock-btn { background: #d4af37; color: black; border: none; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap; }
+        .dock-btn { 
+            background: #d4af37; color: black; border: none; padding: 10px 16px; border-radius: 30px; 
+            font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; 
+            text-decoration: none; white-space: nowrap; cursor: pointer;
+        }
         .dock-btn.secondary { background: #333; color: white; border: 1px solid #555; }
+        
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            .input-panel { display: none; }
+            .preview-panel { height: 100dvh; } 
+        }
     </style>
 </head>
 <body onload="init()">
@@ -717,8 +727,14 @@
         }
         
         function setScale() { 
-            const w = window.innerWidth; const scaler = document.getElementById('card-scaler');
-            if(w < 550) { const scale = (w - 40) / 525; scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; }
+            const w = window.innerWidth; 
+            const h = window.innerHeight;
+            const scaler = document.getElementById('card-scaler'); 
+            let scale = 1;
+            if(w < 550) { scale = (w - 40) / 525; }
+            const requiredHeight = 400; 
+            if (h < requiredHeight) { const hScale = (h - 120) / 300; if (hScale < scale) scale = hScale; }
+            if(w < 550 || h < requiredHeight) { scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; } 
         } 
         window.addEventListener('resize', setScale);
 
@@ -811,14 +827,14 @@
                 pageBgStyle = `background: url('${customPageBgData}') no-repeat; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; background-size: ${sizeVal};`;
             }
 
-            const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;${pageBgStyle}} .input-panel{display:none} .preview-panel{width:100vw;height:100vh;margin:0;padding:0;background:none;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss}</style></head><body>
+            const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;${pageBgStyle}} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;background:none;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss}</style></head><body>
             <div class="preview-panel">
                 ${pageVideoHTML}
                 <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : (showBack ? '👆 Tap to Flip' : '✨ Invitation')}</div>
                 <div class="card-scene">
                     <div id="card-scaler">
                         <div id="card-floater" class="${isLoop ? 'anim-active' : ''}">
-                            <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.toggle('is-flipped')" : ""}">
+                            <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.remove('auto-loop'); this.classList.toggle('is-flipped')" : ""}">
                                 <div class="card-face face-front" id="faceFront">
                                     ${videoHTML}
                                     <div class="custom-bg-overlay"></div><div class="foil-overlay"></div><div class="glare"></div>
@@ -863,7 +879,17 @@ END:VCALENDAR\`;
                     const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'invite.ics';
                     document.body.appendChild(link); link.click(); document.body.removeChild(link);
                 }
-                function setScale() { const w = window.innerWidth; const scaler = document.getElementById('card-scaler'); if(w < 550) { const scale = (w - 40) / 525; scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; } } window.addEventListener('resize', setScale); setScale();
+                function setScale() { 
+                    const w = window.innerWidth; 
+                    const h = window.innerHeight;
+                    const scaler = document.getElementById('card-scaler'); 
+                    let scale = 1;
+                    if(w < 550) { scale = (w - 40) / 525; }
+                    const requiredHeight = 400; 
+                    if (h < requiredHeight) { const hScale = (h - 120) / 300; if (hScale < scale) scale = hScale; }
+                    if(w < 550 || h < requiredHeight) { scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; } 
+                } 
+                window.addEventListener('resize', setScale); setScale();
             <\/script></body></html>`;
             return htmlContent;
         }
