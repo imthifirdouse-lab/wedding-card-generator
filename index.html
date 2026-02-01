@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     
     <style>
         :root { 
@@ -48,36 +48,78 @@
             overflow: hidden;
         }
 
-        /* Themes */
-        .theme-royal { background: #0f172a; border: 2px solid #d4af37; }
-        .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; }
+        /* --- BASE THEMES (Original 3) --- */
+        .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
+        .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
         .theme-ivory .c-gold-text { color: #8b6b3e !important; }
         .theme-ivory .c-sub { color: #666 !important; }
+        .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
 
-        /* Texture Overlays */
+        /* --- NEW 20 THEMES --- */
+        
+        /* 1. Indian Traditional */
+        .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
+        .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
+        .theme-mehendi { background: linear-gradient(135deg, #388e3c, #1b5e20); border: 2px dashed #a5d6a7; color: white; }
+        .theme-haldi { background: linear-gradient(135deg, #ffeb3b, #fbc02d); color: #5d4037 !important; border: 2px solid #fff; }
+        .theme-haldi .c-couple { background: none; -webkit-text-fill-color: #5d4037; }
+        .theme-rajasthani { background: radial-gradient(circle, #e91e63, #880e4f); border: 3px solid #ffc107; color: white; }
+
+        /* 2. Modern Western */
+        .theme-midnight-blue { background: #1a237e; border: 1px solid #534bae; color: white; }
+        .theme-charcoal { background: #212121; border-left: 15px solid #616161; color: white; }
+        .theme-blush { background: linear-gradient(135deg, #fce4ec, #f8bbd0); color: #880e4f !important; border: 1px solid #f48fb1; }
+        .theme-blush .c-couple { background: none; -webkit-text-fill-color: #880e4f; }
+        .theme-blush .c-guest { color: #880e4f !important; }
+        .theme-sage { background: #dcedc8; color: #33691e !important; border: none; }
+        .theme-sage .c-couple { -webkit-text-fill-color: #33691e; background: none; }
+        .theme-marble { background: #f5f5f5; background-image: url('https://www.transparenttextures.com/patterns/white-diamond-dark.png'); color: #212121 !important; border: 1px solid #ddd; }
+        .theme-marble .c-couple { -webkit-text-fill-color: #000; background: none; }
+
+        /* 3. Luxury & Foil */
+        .theme-rose-gold { background: linear-gradient(135deg, #111, #222); border: 2px solid #e6a4a4; color: #e6a4a4 !important; }
+        .theme-rose-gold .c-couple { background: var(--rose-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .theme-platinum { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #212121 !important; border: 1px solid #9e9e9e; }
+        .theme-platinum .c-couple { -webkit-text-fill-color: #424242; background: none; }
+        .theme-emerald { background: linear-gradient(135deg, #004d40, #00251a); border: 2px solid #4db6ac; color: #e0f2f1; }
+        .theme-sapphire { background: linear-gradient(135deg, #0d47a1, #002171); border: 1px solid #64b5f6; color: #e3f2fd; }
+
+        /* 4. Nature & Floral */
+        .theme-lavender { background: linear-gradient(135deg, #ede7f6, #d1c4e9); color: #4a148c !important; }
+        .theme-lavender .c-couple { -webkit-text-fill-color: #4a148c; background: none; }
+        .theme-forest { background: #1b5e20; border-right: 20px solid #a5d6a7; color: white; }
+        .theme-beach { background: linear-gradient(180deg, #81d4fa 0%, #e1f5fe 100%); color: #01579b !important; }
+        .theme-beach .c-couple { -webkit-text-fill-color: #01579b; background: none; }
+
+        /* 5. Fun & Retro */
+        .theme-retro { background: #f4e1d2; color: #bf360c !important; font-family: 'Courier New', monospace; border: 2px dashed #bf360c; }
+        .theme-retro .c-couple { font-family: 'Courier New', monospace; -webkit-text-fill-color: #bf360c; background: none; letter-spacing: -2px; }
+        .theme-cyber { background: #000; border: 2px solid #00ff00; color: #00ff00 !important; font-family: 'Courier New', monospace; }
+        .theme-cyber .c-couple { -webkit-text-fill-color: #00ff00; background: none; text-shadow: 0 0 10px #00ff00; }
+        .theme-bollywood { background: radial-gradient(circle, #ffeb3b, #f57f17); color: #b71c1c !important; border: 4px dotted #b71c1c; }
+        .theme-bollywood .c-couple { -webkit-text-fill-color: #b71c1c; background: none; font-weight: 800; }
+
+        /* --- UTILS --- */
         .foil-overlay { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: 0.3; background: url('https://www.transparenttextures.com/patterns/stardust.png'); pointer-events: none; }
         .glare { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%); pointer-events: none; z-index: 5; }
 
         /* Content Layout */
-        .c-content { padding: 30px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 2; color: #fff; }
+        .c-content { padding: 30px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 2; color: inherit; }
         
         .c-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .c-logo { font-family: 'Great Vibes', cursive; font-size: 28px; color: #d4af37; opacity: 0.9; }
-        .c-vip-badge { font-size: 9px; font-weight: 700; border: 1px solid rgba(255,255,255,0.3); padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .theme-ivory .c-vip-badge { border-color: rgba(0,0,0,0.2); color: #555; }
-
-        .c-main { text-align: left; margin-top: 10px; }
-        .c-couple { font-family: 'Playfair Display', serif; font-size: 38px; line-height: 1; margin-bottom: 5px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .theme-ivory .c-couple { background: none; -webkit-text-fill-color: #333; color: #333; }
+        .c-logo { font-family: 'Great Vibes', cursive; font-size: 28px; color: inherit; opacity: 0.8; }
         
-        .c-guest { font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; color: rgba(255,255,255,0.8); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
-        .theme-ivory .c-guest { color: #666; }
+        .c-main { text-align: left; margin-top: 10px; }
+        .c-couple { font-family: 'Playfair Display', serif; font-size: 38px; line-height: 1; margin-bottom: 5px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .c-guest { font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; color: inherit; opacity: 0.9; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
 
-        .c-details { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; width: 80%; }
-        .theme-ivory .c-details { border-top: 1px solid rgba(0,0,0,0.1); }
+        .c-details { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; width: 80%; color: inherit; }
+        .theme-ivory .c-details, .theme-blush .c-details, .theme-sage .c-details, .theme-marble .c-details, .theme-haldi .c-details, .theme-platinum .c-details, .theme-beach .c-details, .theme-retro .c-details, .theme-bollywood .c-details { border-top: 1px solid rgba(0,0,0,0.2); }
+        
         .c-detail-item { display: flex; flex-direction: column; }
-        .c-label { font-size: 8px; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px; margin-bottom: 2px; }
+        .c-label { font-size: 8px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; margin-bottom: 2px; }
         .c-val { font-size: 11px; font-weight: 700; font-family: 'Playfair Display', serif; }
 
         .c-qr-box { position: absolute; bottom: 25px; right: 25px; background: white; padding: 4px; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
@@ -88,7 +130,6 @@
         .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .btn-gold { background: linear-gradient(45deg, #d4af37, #b8860b); color: white; }
-        .btn-dark { background: #444; color: white; }
         .btn-cal { background: #2ecc71; color: white; }
         .btn-audio { background: transparent; border: 1px solid #555; color: #aaa; width: 100%; margin-top: 10px; }
         .btn-audio.playing { border-color: #d4af37; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
@@ -129,11 +170,48 @@
         <input type="text" id="inVenue" placeholder="Venue Name (e.g. Taj Lands End)" oninput="updateCard()">
         <input type="text" id="inLink" placeholder="Google Maps / RSVP Link" oninput="updateCard()">
 
-        <div class="section-title">4. Aesthetics</div>
-        <select id="themeSel" onchange="updateCard()">
-            <option value="theme-royal">Royal Midnight & Gold</option>
-            <option value="theme-maroon">Sabyasachi Maroon</option>
-            <option value="theme-ivory">Modern Ivory (Minimal)</option>
+        <div class="section-title">4. Aesthetics (23 Options)</div>
+        <select id="themeSel" onchange="updateCard()" style="height: 40px;">
+            <optgroup label="Bestsellers">
+                <option value="theme-royal">Royal Midnight & Gold</option>
+                <option value="theme-maroon">Sabyasachi Maroon</option>
+                <option value="theme-ivory">Modern Ivory (Minimal)</option>
+            </optgroup>
+            
+            <optgroup label="Indian Traditional">
+                <option value="theme-banarasi">Banarasi Silk (Red/Gold)</option>
+                <option value="theme-kanjeevaram">Kanjeevaram Orange</option>
+                <option value="theme-mehendi">Mehendi Green</option>
+                <option value="theme-haldi">Haldi Yellow</option>
+                <option value="theme-rajasthani">Rajasthani Pink</option>
+            </optgroup>
+            
+            <optgroup label="Modern Elegance">
+                <option value="theme-midnight-blue">Midnight Blue</option>
+                <option value="theme-charcoal">Matte Charcoal</option>
+                <option value="theme-blush">Soft Blush Pink</option>
+                <option value="theme-sage">Sage Green (Eco)</option>
+                <option value="theme-marble">Carrara Marble</option>
+            </optgroup>
+            
+            <optgroup label="Luxury Metallic">
+                <option value="theme-rose-gold">Rose Gold Noir</option>
+                <option value="theme-platinum">Platinum Silver</option>
+                <option value="theme-emerald">Royal Emerald</option>
+                <option value="theme-sapphire">Deep Sapphire</option>
+            </optgroup>
+
+            <optgroup label="Nature & Mood">
+                <option value="theme-lavender">Lavender Haze</option>
+                <option value="theme-forest">Deep Forest</option>
+                <option value="theme-beach">Ocean Breeze</option>
+            </optgroup>
+            
+            <optgroup label="Fun & Retro">
+                <option value="theme-retro">Vintage 90s</option>
+                <option value="theme-cyber">Cyber Neon (Party)</option>
+                <option value="theme-bollywood">Bollywood Drama</option>
+            </optgroup>
         </select>
 
         <div class="action-bar">
@@ -153,13 +231,12 @@
             <div class="c-content">
                 <div class="c-top">
                     <div class="c-logo" id="outTag">#RaNjali</div>
-                    <div class="c-vip-badge"><i class="fas fa-crown"></i> VIP ACCESS</div>
                 </div>
 
                 <div class="c-main">
                     <div class="c-guest" id="guestRow">
-                        <i class="fas fa-envelope-open-text" style="color:#d4af37;"></i> 
-                        <span>Special Invite for <span id="outGuest" style="color:white; border-bottom:1px dotted #d4af37;">Mr. & Mrs. Sharma</span></span>
+                        <i class="fas fa-envelope-open-text" style="color:inherit;"></i> 
+                        <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">Mr. & Mrs. Sharma</span></span>
                     </div>
                     <div class="c-couple" id="outName">Rahul & Anjali</div>
                 </div>
@@ -224,12 +301,10 @@
             const theme = document.getElementById('themeSel').value;
             document.getElementById('card').className = `card-wrapper ${theme}`;
             
-            // Text color logic for ivory theme
-            if(theme === 'theme-ivory') {
-                document.getElementById('outGuest').style.color = "#333";
-            } else {
-                document.getElementById('outGuest').style.color = "white";
-            }
+            // Text color logic for ivory theme and other light themes
+            const lightThemes = ['theme-ivory', 'theme-blush', 'theme-sage', 'theme-marble', 'theme-haldi', 'theme-platinum', 'theme-lavender', 'theme-beach', 'theme-retro'];
+            
+            /* (No specific JS logic change needed here as CSS inheritance handles most colors now via 'inherit' or !important in the classes) */
 
             // QR Update
             const link = document.getElementById('inLink').value || "https://example.com";
