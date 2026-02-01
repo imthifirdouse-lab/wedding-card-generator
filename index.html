@@ -57,7 +57,6 @@
         .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
 
         /* --- NEW 20 THEMES --- */
-        
         /* 1. Indian Traditional */
         .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
         .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
@@ -125,14 +124,36 @@
         .c-qr-box { position: absolute; bottom: 25px; right: 25px; background: white; padding: 4px; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .c-qr-label { position: absolute; bottom: -18px; right: 0; width: 100%; text-align: center; font-size: 8px; color: inherit; opacity: 0.7; }
 
+        /* SMART ACTION DOCK (For Live Card) */
+        .guest-dock { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); 
+            display: flex; gap: 12px; z-index: 100; 
+            background: rgba(0,0,0,0.85); padding: 12px; border-radius: 40px; 
+            backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+        }
+        .guest-dock.active { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
+        .dock-btn { 
+            background: #d4af37; color: black; border: none; 
+            padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; 
+            display: flex; align-items: center; gap: 8px; text-decoration: none;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); white-space: nowrap;
+        }
+        .dock-btn.secondary { background: #333; color: white; border: 1px solid #555; box-shadow: none; }
+
         /* BUTTONS */
-        .action-bar { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .action-bar { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 120px; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .btn-gold { background: linear-gradient(45deg, #d4af37, #b8860b); color: white; }
+        .btn-html { background: #3b82f6; color: white; }
         .btn-cal { background: #2ecc71; color: white; }
         .btn-audio { background: transparent; border: 1px solid #555; color: #aaa; width: 100%; margin-top: 10px; }
         .btn-audio.playing { border-color: #d4af37; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        
+        .tap-hint { position: absolute; top: -40px; width: 100%; text-align: center; color: white; font-size: 12px; opacity: 0; transition: 0.5s; pointer-events: none; }
 
         /* ANIMATIONS */
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
@@ -215,16 +236,18 @@
         </select>
 
         <div class="action-bar">
-            <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-download"></i> Save Card</button>
-            <button class="btn btn-cal" onclick="generateCalendar()"><i class="far fa-calendar-check"></i> Calendar Invite</button>
+            <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-image"></i> Save PNG</button>
+            <button class="btn btn-html" onclick="downloadHTML()"><i class="fas fa-bolt"></i> Save Live Card</button>
+            <button class="btn btn-cal" onclick="generateCalendar()"><i class="far fa-calendar-check"></i> Calendar</button>
         </div>
         <div style="font-size: 9px; color: #666; margin-top: 10px; text-align: center;">
-            *Calendar Invite generates a downloadable .ics file for guests.
+            *Live Card = Interactive HTML file. Tap card to see maps.
         </div>
     </div>
 
     <div class="preview-panel">
-        <div class="card-wrapper theme-royal" id="card">
+        <div class="tap-hint" id="tapHint">👆 Tap card to open options</div>
+        <div class="card-wrapper theme-royal" id="card" onclick="toggleDock()">
             <div class="foil-overlay"></div>
             <div class="glare" id="cardGlare"></div>
             
@@ -244,7 +267,7 @@
                 <div class="c-details">
                     <div class="c-detail-item">
                         <span class="c-label">WHEN</span>
-                        <span class="c-val" id="outDate">OCT 24, 2026</span>
+                        <span class="c-val" id="outDate">OCT 24, 2026<br>4:30 PM</span>
                     </div>
                     <div class="c-detail-item">
                         <span class="c-label">WHERE</span>
@@ -258,6 +281,16 @@
                 </div>
             </div>
         </div>
+        
+        <div class="guest-dock" id="guestDock">
+            <a id="btnMap" href="#" target="_blank" class="dock-btn">
+                <i class="fas fa-location-dot"></i> Navigate
+            </a>
+            <a id="btnCal" href="#" onclick="generateCalendar()" class="dock-btn secondary">
+                <i class="far fa-calendar-plus"></i> Add to Calendar
+            </a>
+        </div>
+
         <p style="margin-top:20px; font-size:12px; color: #888; opacity:0.6;"><i class="fas fa-sync-alt fa-spin"></i> Tilt to see premium foil effect</p>
     </div>
 
@@ -275,9 +308,10 @@
                 correctLevel : QRCode.CorrectLevel.L
             });
 
-            // Set default date
+            // Set default date and time
             const today = new Date();
             document.getElementById('inDate').valueAsDate = today;
+            document.getElementById('inTime').value = "16:30"; // Set default time to 4:30 PM
             updateCard();
             initTilt();
         }
@@ -289,26 +323,41 @@
             document.getElementById('outGuest').innerText = document.getElementById('inGuest').value || "Guest Name";
             document.getElementById('outVenue').innerText = document.getElementById('inVenue').value || "Venue Name";
 
-            // Date Formatting
+            // ---- DATE & TIME FORMATTING UPDATED ----
             const dateVal = document.getElementById('inDate').value;
+            let dateStr = "";
             if(dateVal) {
                 const dateObj = new Date(dateVal);
-                const options = { month: 'short', day: 'numeric', year: 'numeric' };
-                document.getElementById('outDate').innerText = dateObj.toLocaleDateString('en-US', options).toUpperCase();
+                dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
             }
+
+            const timeVal = document.getElementById('inTime').value;
+            let timeStr = "";
+            if(timeVal) {
+                 // Convert 24h to 12h format
+                const [sHours, minutes] = timeVal.split(":");
+                const hours = parseInt(sHours);
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const hours12 = hours % 12 || 12;
+                timeStr = `<br>${hours12}:${minutes} ${ampm}`;
+            }
+            // Combine Date and Time with a line break using innerHTML
+            document.getElementById('outDate').innerHTML = dateStr + timeStr;
+            // ----------------------------------------
+
 
             // Theme Update
             const theme = document.getElementById('themeSel').value;
             document.getElementById('card').className = `card-wrapper ${theme}`;
             
-            // Text color logic for ivory theme and other light themes
-            const lightThemes = ['theme-ivory', 'theme-blush', 'theme-sage', 'theme-marble', 'theme-haldi', 'theme-platinum', 'theme-lavender', 'theme-beach', 'theme-retro'];
-            
-            /* (No specific JS logic change needed here as CSS inheritance handles most colors now via 'inherit' or !important in the classes) */
-
-            // QR Update
-            const link = document.getElementById('inLink').value || "https://example.com";
+            // QR & Link Update
+            const link = document.getElementById('inLink').value || "https://maps.google.com";
             qr.makeCode(link);
+            document.getElementById('btnMap').href = link;
+        }
+        
+        function toggleDock() {
+            document.getElementById('guestDock').classList.toggle('active');
         }
 
         function toggleAudio() {
@@ -329,12 +378,10 @@
         }
 
         function generateCalendar() {
-            // Creates an .ics file for the event
             const title = document.getElementById('inName').value + " Wedding";
             const venue = document.getElementById('inVenue').value;
             const dateStr = document.getElementById('inDate').value.replaceAll('-', '');
             
-            // Basic ICS format
             const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//LuxeInvite//Wedding//EN
@@ -357,9 +404,7 @@ END:VCALENDAR`;
 
         function downloadPNG() {
             const card = document.getElementById('card');
-            // Remove glare for cleaner static image
             document.getElementById('cardGlare').style.display = 'none';
-            
             html2canvas(card, { scale: 3, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Invite_${document.getElementById('inGuest').value}.png`;
@@ -369,34 +414,68 @@ END:VCALENDAR`;
             });
         }
 
-        // Gyroscope / Mouse Tilt Effect
-        function initTilt() {
-            const card = document.getElementById('card');
-            const glare = document.getElementById('cardGlare');
-            const container = document.querySelector('.preview-panel');
-
-            container.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg
-                const rotateY = ((x - centerX) / centerX) * 10;
-
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                
-                // Dynamic Glare
-                glare.style.background = `linear-gradient(${rotateY * 10 + 115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
-            });
-
-            container.addEventListener('mouseleave', () => {
-                card.style.transform = `rotateX(0) rotateY(0)`;
-                glare.style.background = `linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%)`;
-            });
-        }
-    </script>
-</body>
-</html>
+        // LIVE HTML DOWNLOAD
+        function downloadHTML() {
+            const styles = document.getElementsByTagName('style')[0].innerHTML;
+            const theme = document.getElementById('themeSel').value;
+            const name = document.getElementById('outName').innerText;
+            const guest = document.getElementById('outGuest').innerText;
+            // Grab the combined date/time HTML
+            const dateTimeHtml = document.getElementById('outDate').innerHTML; 
+            const venue = document.getElementById('outVenue').innerText;
+            const tag = document.getElementById('outTag').innerText;
+            const link = document.getElementById('inLink').value || "https://maps.google.com";
+            
+            const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're Invited: ${name}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <style>
+        ${styles}
+        .input-panel { display: none !important; }
+        .preview-panel { width: 100vw; height: 100vh; background: #111; padding:0; }
+        .tap-hint { opacity: 1; top: 100px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} } 
+    </style>
+</head>
+<body>
+    <div class="preview-panel">
+        <div class="tap-hint">👆 Tap the card to open RSVP options</div>
+        <div class="card-wrapper ${theme}" id="card" onclick="toggleDock()" style="transform: perspective(1000px) rotateX(0) rotateY(0);">
+             <div class="foil-overlay"></div>
+            <div class="glare" id="cardGlare"></div>
+            <div class="c-content">
+                <div class="c-top"><div class="c-logo">${tag}</div></div>
+                <div class="c-main">
+                    <div class="c-guest"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> 
+                        <span>Special Invite for <span style="border-bottom:1px dotted inherit;">${guest}</span></span>
+                    </div>
+                    <div class="c-couple">${name}</div>
+                </div>
+                <div class="c-details">
+                    <div class="c-detail-item"><span class="c-label">WHEN</span><span class="c-val">${dateTimeHtml}</span></div>
+                    <div class="c-detail-item"><span class="c-label">WHERE</span><span class="c-val">${venue}</span></div>
+                </div>
+                <div class="c-qr-box"><div id="qrcode"></div><div class="c-qr-label">RSVP</div></div>
+            </div>
+        </div>
+        <div class="guest-dock" id="guestDock">
+            <a href="${link}" target="_blank" class="dock-btn"><i class="fas fa-location-dot"></i> Navigate</a>
+            <a href="#" onclick="generateCalendar()" class="dock-btn secondary"><i class="far fa-calendar-plus"></i> Add to Calendar</a>
+        </div>
+    </div>
+    <script>
+        new QRCode(document.getElementById("qrcode"), { text: "${link}", width: 70, height: 70, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
+        function toggleDock() { document.getElementById('guestDock').classList.toggle('active'); }
+        function generateCalendar() { alert("Please save the event details manually or use the link provided."); }
+        
+        const card = document.getElementById('card');
+        const glare = document.getElementById('cardGlare');
+        document.addEventListener('mousemove', (e) => {
+            const centerX
