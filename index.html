@@ -26,7 +26,7 @@
         .input-panel { width: 420px; background: var(--panel); padding: 30px; overflow-y: auto; border-right: 1px solid #444; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 10; }
         .brand { font-family: 'Playfair Display', serif; font-size: 26px; color: #d4af37; letter-spacing: 1px; margin-bottom: 5px; }
         .subtitle { font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 25px; letter-spacing: 2px; }
-        .section-title { font-size: 10px; font-weight: 700; color: #d4af37; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px; }
+        .section-title { font-size: 10px; font-weight: 700; color: #d4af37; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
         
         input[type="text"], input[type="date"], input[type="time"], select { width: 100%; padding: 12px; background: #3d3d3d; border: 1px solid #555; color: white; border-radius: 6px; font-size: 13px; margin-bottom: 10px; transition: 0.3s; }
         input:focus { border-color: #d4af37; outline: none; background: #454545; }
@@ -58,21 +58,21 @@
         /* Manual Flip Class */
         .card-wrapper.is-flipped { transform: rotateY(180deg); }
 
-        /* Auto Loop Animation */
-        @keyframes loopSequence {
-            0%, 45% { transform: rotateY(0deg); }   /* Hold Front */
-            50%, 95% { transform: rotateY(180deg); } /* Hold Back */
-            100% { transform: rotateY(360deg); }    /* Reset */
+        /* Gentle Cinematic Idle Animation */
+        @keyframes gentleSway {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            25% { transform: rotateX(3deg) rotateY(4deg); }
+            50% { transform: rotateX(0deg) rotateY(0deg); }
+            75% { transform: rotateX(-3deg) rotateY(-4deg); }
+            100% { transform: rotateX(0deg) rotateY(0deg); }
         }
         
         .card-wrapper.auto-loop {
-            animation: loopSequence 12s infinite ease-in-out;
+            animation: gentleSway 8s infinite ease-in-out;
         }
         
-        /* Pause Loop on Interaction so user can read */
-        .card-wrapper.auto-loop:hover, 
-        .card-wrapper.auto-loop:active,
-        .card-wrapper.auto-loop:focus {
+        /* Pause Loop on Hover */
+        .card-wrapper.auto-loop:hover {
             animation-play-state: paused;
         }
 
@@ -95,12 +95,48 @@
         .b-time { font-size: 11px; font-weight: bold; color: #d4af37; width: 60px; }
         .b-event { font-size: 12px; font-family: 'Montserrat', sans-serif; opacity: 0.9; }
 
-        /* --- THEMES --- */
+        /* --- THEMES (ALL 23 INCLUDED) --- */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
         .theme-ivory .c-gold-text { color: #8b6b3e !important; }
-        /* (Shortened theme list for brevity, logic remains in JS) */
+        .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
+
+        .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
+        .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
+        .theme-mehendi { background: linear-gradient(135deg, #388e3c, #1b5e20); border: 2px dashed #a5d6a7; color: white; }
+        .theme-haldi { background: linear-gradient(135deg, #ffeb3b, #fbc02d); color: #5d4037 !important; border: 2px solid #fff; }
+        .theme-haldi .c-couple { background: none; -webkit-text-fill-color: #5d4037; }
+        .theme-rajasthani { background: radial-gradient(circle, #e91e63, #880e4f); border: 3px solid #ffc107; color: white; }
+
+        .theme-midnight-blue { background: #1a237e; border: 1px solid #534bae; color: white; }
+        .theme-charcoal { background: #212121; border-left: 15px solid #616161; color: white; }
+        .theme-blush { background: linear-gradient(135deg, #fce4ec, #f8bbd0); color: #880e4f !important; border: 1px solid #f48fb1; }
+        .theme-blush .c-couple { background: none; -webkit-text-fill-color: #880e4f; }
+        .theme-blush .c-guest { color: #880e4f !important; }
+        .theme-sage { background: #dcedc8; color: #33691e !important; border: none; }
+        .theme-sage .c-couple { -webkit-text-fill-color: #33691e; background: none; }
+        .theme-marble { background: #f5f5f5; background-image: url('https://www.transparenttextures.com/patterns/white-diamond-dark.png'); color: #212121 !important; border: 1px solid #ddd; }
+        .theme-marble .c-couple { -webkit-text-fill-color: #000; background: none; }
+
+        .theme-rose-gold { background: linear-gradient(135deg, #111, #222); border: 2px solid #e6a4a4; color: #e6a4a4 !important; }
+        .theme-rose-gold .c-couple { background: linear-gradient(135deg, #e6a4a4, #fcdbdb, #d47e7e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .theme-platinum { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #212121 !important; border: 1px solid #9e9e9e; }
+        .theme-platinum .c-couple { -webkit-text-fill-color: #424242; background: none; }
+        .theme-emerald { background: linear-gradient(135deg, #004d40, #00251a); border: 2px solid #4db6ac; color: #e0f2f1; }
+        .theme-sapphire { background: linear-gradient(135deg, #0d47a1, #002171); border: 1px solid #64b5f6; color: #e3f2fd; }
+
+        .theme-lavender { background: linear-gradient(135deg, #ede7f6, #d1c4e9); color: #4a148c !important; }
+        .theme-lavender .c-couple { -webkit-text-fill-color: #4a148c; background: none; }
+        .theme-forest { background: #1b5e20; border-right: 20px solid #a5d6a7; color: white; }
+        .theme-beach { background: linear-gradient(180deg, #81d4fa 0%, #e1f5fe 100%); color: #01579b !important; }
+        .theme-beach .c-couple { -webkit-text-fill-color: #01579b; background: none; }
+        .theme-retro { background: #f4e1d2; color: #bf360c !important; font-family: 'Courier New', monospace; border: 2px dashed #bf360c; }
+        .theme-retro .c-couple { font-family: 'Courier New', monospace; -webkit-text-fill-color: #bf360c; background: none; letter-spacing: -2px; }
+        .theme-cyber { background: #000; border: 2px solid #00ff00; color: #00ff00 !important; font-family: 'Courier New', monospace; }
+        .theme-cyber .c-couple { -webkit-text-fill-color: #00ff00; background: none; text-shadow: 0 0 10px #00ff00; }
+        .theme-bollywood { background: radial-gradient(circle, #ffeb3b, #f57f17); color: #b71c1c !important; border: 4px dotted #b71c1c; }
+        .theme-bollywood .c-couple { -webkit-text-fill-color: #b71c1c; background: none; font-weight: 800; }
 
         /* Utils */
         .foil-overlay { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: 0.3; background: url('https://www.transparenttextures.com/patterns/stardust.png'); pointer-events: none; z-index: 2; }
@@ -110,6 +146,8 @@
         .has-custom-bg .custom-bg-overlay { display: block; }
         .has-custom-bg .card-face { border: none !important; color: white !important; }
         .has-custom-bg .c-couple { -webkit-text-fill-color: white !important; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
+        .has-custom-bg .c-guest, .has-custom-bg .c-details, .has-custom-bg .c-val, .has-custom-bg .c-label, .has-custom-bg .c-logo { color: white !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .has-custom-bg .c-details { border-top-color: rgba(255,255,255,0.4) !important; }
 
         /* Content */
         .c-content { padding: 30px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 3; color: inherit; pointer-events: none; }
@@ -177,22 +215,63 @@
         <input type="text" id="inVenue" placeholder="Venue Name" oninput="updateCard()">
         <input type="text" id="inLink" placeholder="Maps Link" oninput="updateCard()">
 
-        <div class="section-title">3. Back: Itinerary</div>
-        <div class="row"><input type="text" id="ev1Time" value="10:00 AM" oninput="updateCard()"><input type="text" id="ev1Name" value="Haldi Ceremony" oninput="updateCard()"></div>
-        <div class="row"><input type="text" id="ev2Time" value="07:00 PM" oninput="updateCard()"><input type="text" id="ev2Name" value="Wedding Reception" oninput="updateCard()"></div>
-        <div class="row"><input type="text" id="ev3Time" value="09:00 PM" oninput="updateCard()"><input type="text" id="ev3Name" value="Dinner & Dance" oninput="updateCard()"></div>
+        <div class="section-title">
+            <span>3. Back: Itinerary</span>
+            <div style="display:flex; align-items:center;">
+                <input type="checkbox" id="checkBack" checked onchange="updateCard()" style="width:auto; margin:0 5px 0 0;">
+                <span style="font-size:10px; color:#aaa; font-weight:normal;">Enable</span>
+            </div>
+        </div>
+        
+        <div id="backInputs">
+            <div class="row"><input type="text" id="ev1Time" value="10:00 AM" oninput="updateCard()"><input type="text" id="ev1Name" value="Haldi Ceremony" oninput="updateCard()"></div>
+            <div class="row"><input type="text" id="ev2Time" value="07:00 PM" oninput="updateCard()"><input type="text" id="ev2Name" value="Wedding Reception" oninput="updateCard()"></div>
+            <div class="row"><input type="text" id="ev3Time" value="09:00 PM" oninput="updateCard()"><input type="text" id="ev3Name" value="Dinner & Dance" oninput="updateCard()"></div>
+        </div>
 
-        <div class="section-title">4. Aesthetics & Loop</div>
+        <div class="section-title">4. Aesthetics & Motion</div>
         <select id="themeSel" onchange="updateCard()" style="height: 40px; margin-bottom: 15px;">
             <option value="theme-none">-- Custom Wallpaper --</option>
-            <option value="theme-royal" selected>Royal Midnight & Gold</option>
-            <option value="theme-maroon">Sabyasachi Maroon</option>
-            <option value="theme-ivory">Modern Ivory</option>
+            <optgroup label="Bestsellers">
+                <option value="theme-royal" selected>Royal Midnight & Gold</option>
+                <option value="theme-maroon">Sabyasachi Maroon</option>
+                <option value="theme-ivory">Modern Ivory</option>
+            </optgroup>
+            <optgroup label="Indian Traditional">
+                <option value="theme-banarasi">Banarasi Silk</option>
+                <option value="theme-kanjeevaram">Kanjeevaram Orange</option>
+                <option value="theme-mehendi">Mehendi Green</option>
+                <option value="theme-haldi">Haldi Yellow</option>
+                <option value="theme-rajasthani">Rajasthani Pink</option>
+            </optgroup>
+            <optgroup label="Modern Elegance">
+                <option value="theme-midnight-blue">Midnight Blue</option>
+                <option value="theme-charcoal">Matte Charcoal</option>
+                <option value="theme-blush">Soft Blush Pink</option>
+                <option value="theme-sage">Sage Green (Eco)</option>
+                <option value="theme-marble">Carrara Marble</option>
+            </optgroup>
+            <optgroup label="Luxury Metallic">
+                <option value="theme-rose-gold">Rose Gold Noir</option>
+                <option value="theme-platinum">Platinum Silver</option>
+                <option value="theme-emerald">Royal Emerald</option>
+                <option value="theme-sapphire">Deep Sapphire</option>
+            </optgroup>
+            <optgroup label="Nature & Mood">
+                <option value="theme-lavender">Lavender Haze</option>
+                <option value="theme-forest">Deep Forest</option>
+                <option value="theme-beach">Ocean Breeze</option>
+            </optgroup>
+            <optgroup label="Fun & Retro">
+                <option value="theme-retro">Vintage 90s</option>
+                <option value="theme-cyber">Cyber Neon</option>
+                <option value="theme-bollywood">Bollywood Drama</option>
+            </optgroup>
         </select>
         
         <div class="toggle-row" style="background: rgba(212,175,55,0.1); padding:10px; border-radius:6px; margin-bottom:15px;">
-            <input type="checkbox" id="checkLoop" onchange="updateCard()">
-            <label for="checkLoop" style="color:#d4af37; font-weight:bold;">Enable Auto-Flip Loop</label>
+            <input type="checkbox" id="checkLoop" checked onchange="updateCard()">
+            <label for="checkLoop" style="color:#d4af37; font-weight:bold;">Enable Gentle Motion</label>
         </div>
         
         <div style="border-top: 1px solid #444; padding-top: 10px; margin-bottom: 15px;">
@@ -223,7 +302,7 @@
         </div>
         
         <div class="card-scene">
-            <div class="card-wrapper theme-royal" id="card" onclick="handleCardClick()">
+            <div class="card-wrapper theme-royal auto-loop" id="card" onclick="handleCardClick()">
                 
                 <div class="card-face face-front" id="faceFront">
                     <div class="custom-bg-overlay"></div>
@@ -259,7 +338,7 @@
         
         <div class="guest-dock" id="guestDock">
             <a id="btnMap" href="#" target="_blank" class="dock-btn"><i class="fas fa-location-dot"></i> Navigate</a>
-            <button onclick="toggleFlip()" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>
+            <button id="btnFlipDock" onclick="toggleFlip()" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>
         </div>
     </div>
 
@@ -277,6 +356,9 @@
         }
 
         function toggleFlip() {
+            // Check if back is enabled
+            if(!document.getElementById('checkBack').checked) return;
+
             // Only flip if loop is NOT active
             if (!document.getElementById('checkLoop').checked) {
                 isFlipped = !isFlipped;
@@ -338,24 +420,28 @@
             document.getElementById('guestRow').style.display = document.getElementById('checkGuest').checked ? 'flex' : 'none';
             document.getElementById('qrBox').style.display = document.getElementById('checkQR').checked ? 'block' : 'none';
             
+            // Back Side Toggle Logic
+            const showBack = document.getElementById('checkBack').checked;
+            document.getElementById('backInputs').style.display = showBack ? 'block' : 'none';
+            document.getElementById('btnFlipDock').style.display = showBack ? 'flex' : 'none';
+            if(!showBack && isFlipped) toggleFlip(); // reset if currently flipped
+
             // Loop Logic
             const isLoop = document.getElementById('checkLoop').checked;
             const card = document.getElementById('card');
             const hint = document.getElementById('hintText');
-            if(isLoop) {
+            
+            if(isLoop && !isFlipped) { 
                 card.classList.add('auto-loop');
-                card.classList.remove('is-flipped'); // Reset manual flip
                 hint.innerText = "✋ Hover to Pause";
             } else {
                 card.classList.remove('auto-loop');
-                hint.innerText = "👆 Tap to Flip";
+                hint.innerText = showBack ? "👆 Tap to Flip" : "✨ Invitation";
             }
 
             // Date
             const d = new Date(document.getElementById('inDate').value);
             const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
-            
-            // Time
             const t = document.getElementById('inTime').value;
             let timeStr = "";
             if(t) {
@@ -370,9 +456,9 @@
             const face = document.getElementById('faceFront');
             const theme = document.getElementById('themeSel').value;
             
-            // Reset base classes
             card.className = 'card-wrapper ' + theme;
-            if(isLoop) card.classList.add('auto-loop'); // Re-add loop if active
+            if(isLoop && !isFlipped) card.classList.add('auto-loop');
+            if(isFlipped) card.classList.add('is-flipped');
             
             if (customBgData) {
                 card.classList.add('has-custom-bg');
@@ -396,7 +482,7 @@
                 if(!customBgData) return;
                 isDragging = true; startPos = { x: e.clientX, y: e.clientY };
                 face.style.cursor = 'grabbing';
-                e.stopPropagation(); // Prevent flip
+                e.stopPropagation(); 
             });
 
             window.addEventListener('mouseup', () => { isDragging = false; if(customBgData) face.style.cursor = 'move'; });
@@ -408,7 +494,6 @@
                     face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
                     startPos = { x: e.clientX, y: e.clientY };
                 } else if(!document.getElementById('checkLoop').checked) {
-                    // Tilt Logic (Only if not looping)
                     const rect = document.getElementById('card').getBoundingClientRect();
                     const x = e.clientX - rect.left; const y = e.clientY - rect.top;
                     const centerX = rect.width / 2; const centerY = rect.height / 2;
@@ -427,31 +512,25 @@
         }
 
         function downloadPNG() {
-            // Temporarily disable flip to capture front
             const card = document.getElementById('card');
             const wasLoop = card.classList.contains('auto-loop');
             card.classList.remove('auto-loop'); card.style.transform = "none";
             document.getElementById('cardGlare').style.display = 'none';
-            
             html2canvas(document.getElementById('faceFront'), { scale: 3 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Invite_Front.png';
-                link.href = canvas.toDataURL();
-                link.click();
+                const link = document.createElement('a'); link.download = 'Invite_Front.png'; link.href = canvas.toDataURL(); link.click();
                 document.getElementById('cardGlare').style.display = 'block';
                 if(wasLoop) card.classList.add('auto-loop');
             });
         }
 
         function downloadHTML() {
-            // Get current state
             const styles = document.getElementsByTagName('style')[0].innerHTML;
             const theme = document.getElementById('themeSel').value;
             const name = document.getElementById('outName').innerText;
             const dateHTML = document.getElementById('outDate').innerHTML;
             const isLoop = document.getElementById('checkLoop').checked;
+            const showBack = document.getElementById('checkBack').checked;
             
-            // Get Back Data
             const ev1T = document.getElementById('oEv1Time').innerText; const ev1N = document.getElementById('oEv1Name').innerText;
             const ev2T = document.getElementById('oEv2Time').innerText; const ev2N = document.getElementById('oEv2Name').innerText;
             const ev3T = document.getElementById('oEv3Time').innerText; const ev3N = document.getElementById('oEv3Name').innerText;
@@ -468,9 +547,9 @@
 
             const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><style>${styles} body{margin:0;background:#111;overflow:hidden} .input-panel{display:none} .preview-panel{width:100vw;height:100vh;margin:0;padding:0} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss}</style></head><body>
             <div class="preview-panel">
-                <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : '👆 Tap to Flip'}</div>
+                <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : (showBack ? '👆 Tap to Flip' : '✨ Invitation')}</div>
                 <div class="card-scene">
-                    <div class="card-wrapper ${wrapperClass}" id="card" onclick="if(!this.classList.contains('auto-loop')) this.classList.toggle('is-flipped')">
+                    <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.remove('auto-loop'); this.classList.toggle('is-flipped')" : ""}">
                         <div class="card-face face-front" id="faceFront">
                             <div class="custom-bg-overlay"></div><div class="foil-overlay"></div><div class="glare"></div>
                             <div class="c-content">
@@ -479,34 +558,16 @@
                                 <div class="c-details"><div class="c-detail-item"><span class="c-label">WHEN</span><span class="c-val">${dateHTML}</span></div><div class="c-detail-item"><span class="c-label">WHERE</span><span class="c-val">${document.getElementById('outVenue').innerText}</span></div></div>
                             </div>
                         </div>
-                        <div class="card-face face-back">
-                            <div class="b-header">Itinerary</div>
-                            <div class="b-timeline">
-                                <div class="b-item"><div class="b-time">${ev1T}</div><div class="b-event">${ev1N}</div></div>
-                                <div class="b-item"><div class="b-time">${ev2T}</div><div class="b-event">${ev2N}</div></div>
-                                <div class="b-item"><div class="b-time">${ev3T}</div><div class="b-event">${ev3N}</div></div>
-                            </div>
-                        </div>
+                        ${showBack ? `<div class="card-face face-back"><div class="b-header">Itinerary</div><div class="b-timeline"><div class="b-item"><div class="b-time">${ev1T}</div><div class="b-event">${ev1N}</div></div><div class="b-item"><div class="b-time">${ev2T}</div><div class="b-event">${ev2N}</div></div><div class="b-item"><div class="b-time">${ev3T}</div><div class="b-event">${ev3N}</div></div></div></div>` : ''}
                     </div>
                 </div>
                 <div class="guest-dock active" style="bottom:30px">
                     <a href="${document.getElementById('inLink').value}" target="_blank" class="dock-btn"><i class="fas fa-map-marker-alt"></i> Navigate</a>
-                    <button onclick="document.getElementById('card').classList.toggle('is-flipped')" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>
+                    ${showBack ? `<button onclick="document.getElementById('card').classList.remove('auto-loop'); document.getElementById('card').classList.toggle('is-flipped')" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>` : ''}
                 </div>
             </div>
             <script>
-                // Mobile Scaling
-                function setScale() {
-                    const w = window.innerWidth;
-                    const card = document.querySelector('.card-wrapper');
-                    if(w < 550) { 
-                        const scale = (w - 40) / 525; 
-                        card.style.transform = 'scale('+scale+')'; 
-                        // Fix for flip when scaled
-                        card.style.transformOrigin = 'center center';
-                    }
-                }
-                window.addEventListener('resize', setScale); setScale();
+                function setScale() { const w = window.innerWidth; const card = document.querySelector('.card-wrapper'); if(w < 550) { const scale = (w - 40) / 525; card.style.transform = 'scale('+scale+')'; card.style.transformOrigin = 'center center'; } } window.addEventListener('resize', setScale); setScale();
             <\/script></body></html>`;
             
             const blob = new Blob([htmlContent], {type: 'text/html'});
