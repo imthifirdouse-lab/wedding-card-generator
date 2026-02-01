@@ -45,22 +45,28 @@
         /* --- PREVIEW --- */
         .preview-panel { 
             flex: 1; 
+            /* Default Fallback */
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000); 
             background-size: auto, cover; background-position: center; background-repeat: no-repeat;
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            perspective: 1500px; position: relative; cursor: default;
+            perspective: 1500px; position: relative; cursor: default; overflow: hidden;
         }
-        /* Cursor for page drag */
         .preview-panel.can-drag { cursor: move; }
+        
+        /* Page Background Video Element */
+        #pageBgVideoEl {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0; display: none; pointer-events: none;
+        }
 
         /* --- CARD SCENE & ANIMATION --- */
-        .card-scene { width: 525px; height: 300px; position: relative; pointer-events: none; /* Let clicks pass through scene unless hitting card */ }
+        .card-scene { width: 525px; height: 300px; position: relative; z-index: 5; pointer-events: none; }
         
         #card-scaler { width: 100%; height: 100%; transform-origin: center center; }
         #card-floater { width: 100%; height: 100%; transform-style: preserve-3d; }
         
         .card-wrapper { 
-            width: 100%; height: 100%; position: relative; pointer-events: auto; /* Re-enable clicks on card */
+            width: 100%; height: 100%; position: relative; pointer-events: auto; 
             transform-style: preserve-3d; 
             transition: transform 0.1s linear; 
             background-color: #333; background-size: cover; background-position: center;
@@ -98,7 +104,7 @@
         .b-time { font-size: 11px; font-weight: bold; color: #d4af37; width: 60px; }
         .b-event { font-size: 12px; font-family: 'Montserrat', sans-serif; opacity: 0.9; }
 
-        /* --- THEMES --- */
+        /* --- THEMES (ALL 23 INCLUDED) --- */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
@@ -156,7 +162,7 @@
         .c-logo { font-family: 'Great Vibes', cursive; font-size: 28px; opacity: 0.9; }
         .c-main { text-align: left; margin-top: 10px; }
         .c-couple { font-family: 'Playfair Display', serif; font-size: 38px; line-height: 1; margin-bottom: 5px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .c-guest { font-size: 12px; font-weight: 600; opacity: 0.9; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+        .c-guest { font-size: 12px; font-weight: 600; opacity: 0.9; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .c-details { display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; width: 80%; }
         .c-detail-item { display: flex; flex-direction: column; }
         .c-label { font-size: 8px; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
@@ -316,8 +322,12 @@
             <button onclick="clearCustomBg()" class="btn" style="background:#444; font-size:10px; padding:5px;">Clear Media</button>
         </div>
 
-        <div class="section-title">6. Page Background</div>
-        <input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()">
+        <div class="section-title">6. Page Background (Image OR Video)</div>
+        <div style="display:flex; gap:5px;">
+            <input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()" style="width:50%">
+            <input type="file" id="pageVidInput" accept="video/*" onchange="handlePageVideoUpload()" style="width:50%">
+        </div>
+        
         <div id="pagePhotoControls" style="display:none; margin-top:10px;">
             <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div>
             <input type="range" id="pageZoomRange" min="50" max="250" step="5" value="100" oninput="updatePagePhotoSettings()">
@@ -334,6 +344,8 @@
     </div>
 
     <div class="preview-panel">
+        <video id="pageBgVideoEl" loop muted playsinline autoplay></video>
+        
         <div class="tap-hint" id="tapHint" style="color:white; opacity:0.7; margin-bottom:10px;">
             <span id="hintText">👆 Tap to Flip</span>
         </div>
@@ -385,6 +397,7 @@
         let customBgData = null; 
         let customVideoData = null; 
         let customPageBgData = null;
+        let customPageVideoData = null; // New Page Video Var
         
         // Card BG Pos
         let bgPos = { x: 50, y: 50 };
@@ -462,6 +475,21 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 customPageBgData = e.target.result;
+                customPageVideoData = null;
+                document.getElementById('pagePhotoControls').style.display = 'block';
+                pageBgPos = { x: 50, y: 50 };
+                updatePageTheme();
+            }
+            reader.readAsDataURL(file);
+        }
+        
+        function handlePageVideoUpload() {
+            const file = document.getElementById('pageVidInput').files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customPageVideoData = e.target.result;
+                customPageBgData = null;
                 document.getElementById('pagePhotoControls').style.display = 'block';
                 pageBgPos = { x: 50, y: 50 };
                 updatePageTheme();
@@ -471,16 +499,34 @@
         
         function updatePageTheme() {
             const panel = document.querySelector('.preview-panel');
-            if(customPageBgData) {
-                const zoom = document.getElementById('pageZoomRange').value;
+            const vidEl = document.getElementById('pageBgVideoEl');
+            const zoom = document.getElementById('pageZoomRange').value;
+            
+            if(customPageVideoData) {
+                // Page Video Mode
+                panel.style.background = 'none';
+                vidEl.style.display = 'block';
+                vidEl.src = customPageVideoData;
+                vidEl.play();
+                vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
+                // Video zoom
+                vidEl.style.transform = `scale(${zoom/100})`;
+                panel.classList.add('can-drag');
+            }
+            else if(customPageBgData) {
+                // Page Image Mode
+                vidEl.style.display = 'none';
+                vidEl.pause();
                 panel.style.background = `url(${customPageBgData}) no-repeat`;
                 panel.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
-                // If zoom is 100%, we treat it as 'cover', else explicit size
                 if(zoom == 100) panel.style.backgroundSize = 'cover';
                 else panel.style.backgroundSize = zoom + "%";
                 panel.classList.add('can-drag');
             } else {
+                // Default Mode
+                vidEl.style.display = 'none';
                 panel.style.background = `url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000)`;
+                panel.style.backgroundSize = 'auto, cover';
                 panel.classList.remove('can-drag');
             }
         }
@@ -493,7 +539,9 @@
         
         function clearPageBg() {
             customPageBgData = null;
+            customPageVideoData = null;
             document.getElementById('pageBgInput').value = "";
+            document.getElementById('pageVidInput').value = "";
             document.getElementById('pagePhotoControls').style.display = 'none';
             updatePageTheme();
         }
@@ -617,7 +665,7 @@
             
             // 2. Page Drag (Container)
             container.addEventListener('mousedown', (e) => {
-                if(!customPageBgData) return;
+                if(!customPageBgData && !customPageVideoData) return;
                 // Ensure we didn't click card (though stopProp above handles it)
                 isDraggingPage = true; startPos = { x: e.clientX, y: e.clientY };
                 container.style.cursor = 'grabbing';
@@ -626,7 +674,7 @@
             window.addEventListener('mouseup', () => { 
                 isDraggingCard = false; isDraggingPage = false;
                 if(customBgData||customVideoData) face.style.cursor = 'move';
-                if(customPageBgData) container.style.cursor = 'move';
+                if(customPageBgData||customPageVideoData) container.style.cursor = 'move';
             });
 
             container.addEventListener('mousemove', (e) => {
@@ -634,8 +682,12 @@
                 if (isDraggingCard) {
                     const dx = e.clientX - startPos.x; const dy = e.clientY - startPos.y;
                     bgPos.x += dx * 0.1; bgPos.y += dy * 0.1;
-                    if(customVideoData) { document.getElementById('bgVideo').style.objectPosition = `${bgPos.x}% ${bgPos.y}%`; } 
-                    else { face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`; }
+                    
+                    if(customVideoData) {
+                        document.getElementById('bgVideo').style.objectPosition = `${bgPos.x}% ${bgPos.y}%`;
+                    } else {
+                        face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
+                    }
                     startPos = { x: e.clientX, y: e.clientY };
                 } 
                 // Page Drag Logic
@@ -693,28 +745,18 @@
             const mode = document.getElementById('genMode').value;
             
             if(mode === 'bulk') {
-                // BULK MODE
                 const rawList = document.getElementById('bulkList').value;
                 const names = rawList.split('\n').filter(n => n.trim() !== '');
                 if(names.length === 0) { alert("Please enter names!"); return; }
-                
                 const zip = new JSZip();
-                
-                // We reuse the template generation logic
                 names.forEach((guestName) => {
                     const htmlContent = generateCardHTML(guestName.trim());
                     zip.file(`Invite_${guestName.trim().replace(/\s+/g, '_')}.html`, htmlContent);
                 });
-                
                 zip.generateAsync({type:"blob"}).then(function(content) {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(content);
-                    link.download = "Wedding_Invites.zip";
-                    link.click();
+                    const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "Wedding_Invites.zip"; link.click();
                 });
-                
             } else {
-                // SINGLE MODE
                 const guestName = document.getElementById('outGuest').innerText;
                 const htmlContent = generateCardHTML(guestName);
                 const blob = new Blob([htmlContent], {type: 'text/html'});
@@ -723,13 +765,14 @@
         }
 
         function generateCardHTML(guestName) {
-            // Reuses current state but swaps name
             const styles = document.getElementsByTagName('style')[0].innerHTML;
             const theme = document.getElementById('themeSel').value;
             const name = document.getElementById('outName').innerText;
             const dateHTML = document.getElementById('outDate').innerHTML;
             const isLoop = document.getElementById('checkLoop').checked;
             const showBack = document.getElementById('checkBack').checked;
+            const checkGuest = document.getElementById('checkGuest').checked; 
+            const checkQR = document.getElementById('checkQR').checked; 
             
             const ev1T = document.getElementById('oEv1Time').innerText; const ev1N = document.getElementById('oEv1Name').innerText;
             const ev2T = document.getElementById('oEv2Time').innerText; const ev2N = document.getElementById('oEv2Name').innerText;
@@ -756,9 +799,13 @@
             }
             if(isLoop) wrapperClass += ' auto-loop';
             
-            // Page BG CSS for export
             let pageBgStyle = 'background: #111;';
-            if(customPageBgData) {
+            let pageVideoHTML = '';
+            if(customPageVideoData) {
+                const zoom = document.getElementById('pageZoomRange').value;
+                pageVideoHTML = `<video id="pageBgVideoEl" loop muted playsinline autoplay src="${customPageVideoData}" style="display:block; object-position: ${pageBgPos.x}% ${pageBgPos.y}%; transform: scale(${zoom/100});"></video>`;
+                pageBgStyle = 'background: none;';
+            } else if(customPageBgData) {
                 const zoom = document.getElementById('pageZoomRange').value;
                 let sizeVal = zoom == 100 ? 'cover' : zoom + "%";
                 pageBgStyle = `background: url('${customPageBgData}') no-repeat; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; background-size: ${sizeVal};`;
@@ -766,19 +813,24 @@
 
             const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;${pageBgStyle}} .input-panel{display:none} .preview-panel{width:100vw;height:100vh;margin:0;padding:0;background:none;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss}</style></head><body>
             <div class="preview-panel">
+                ${pageVideoHTML}
                 <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : (showBack ? '👆 Tap to Flip' : '✨ Invitation')}</div>
                 <div class="card-scene">
                     <div id="card-scaler">
                         <div id="card-floater" class="${isLoop ? 'anim-active' : ''}">
-                            <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.remove('auto-loop'); this.classList.toggle('is-flipped')" : ""}">
+                            <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.toggle('is-flipped')" : ""}">
                                 <div class="card-face face-front" id="faceFront">
                                     ${videoHTML}
                                     <div class="custom-bg-overlay"></div><div class="foil-overlay"></div><div class="glare"></div>
                                     <div class="c-content">
                                         <div class="c-top"><div class="c-logo">${document.getElementById('outTag').innerText}</div></div>
-                                        <div class="c-main"><div class="c-couple">${name}</div></div>
+                                        <div class="c-main">
+                                            ${checkGuest ? `<div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">${guestName}</span></span></div>` : ''}
+                                            <div class="c-couple">${name}</div>
+                                        </div>
                                         <div class="c-details"><div class="c-detail-item"><span class="c-label">WHEN</span><span class="c-val">${dateHTML}</span></div><div class="c-detail-item"><span class="c-label">WHERE</span><span class="c-val">${document.getElementById('outVenue').innerText}</span></div></div>
                                     </div>
+                                    ${checkQR ? `<div class="c-qr-box" id="qrBox"><div id="qrcode"></div><div class="c-qr-label">RSVP</div></div>` : ''}
                                 </div>
                                 ${showBack ? `<div class="card-face face-back"><div class="b-header">Itinerary</div><div class="b-timeline"><div class="b-item"><div class="b-time">${ev1T}</div><div class="b-event">${ev1N}</div></div><div class="b-item"><div class="b-time">${ev2T}</div><div class="b-event">${ev2N}</div></div><div class="b-item"><div class="b-time">${ev3T}</div><div class="b-event">${ev3N}</div></div></div></div>` : ''}
                             </div>
@@ -788,7 +840,7 @@
                 <div class="guest-dock active" style="bottom:30px">
                     <a href="${document.getElementById('inLink').value}" target="_blank" class="dock-btn"><i class="fas fa-map-marker-alt"></i> Navigate</a>
                     <button onclick="addToCalendar()" class="dock-btn secondary"><i class="far fa-calendar-plus"></i> Calendar</button>
-                    ${showBack ? `<button onclick="document.getElementById('card').classList.remove('auto-loop'); document.getElementById('card').classList.toggle('is-flipped')" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>` : ''}
+                    ${showBack ? `<button onclick="document.getElementById('card').classList.toggle('is-flipped')" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>` : ''}
                 </div>
             </div>
             <script>
