@@ -16,6 +16,7 @@
         :root { 
             --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); 
             --bg: #1a1a1a; --panel: #2d2d2d; --text: #f0f0f0; 
+            --overlay-opacity: 0.4;
         }
         
         * { box-sizing: border-box; }
@@ -29,12 +30,15 @@
         
         input[type="text"], input[type="date"], input[type="time"], select { width: 100%; padding: 12px; background: #3d3d3d; border: 1px solid #555; color: white; border-radius: 6px; font-size: 13px; margin-bottom: 10px; transition: 0.3s; }
         input:focus { border-color: #d4af37; outline: none; background: #454545; }
+        input[type="file"] { background: none; border: none; padding: 0; font-size: 11px; color: #aaa; margin-bottom: 5px; }
         
-        /* Toggles */
+        /* Sliders */
+        input[type="range"] { width: 100%; accent-color: #d4af37; margin-bottom: 15px; cursor: pointer; }
+        .range-label { font-size: 10px; color: #ccc; display: flex; justify-content: space-between; margin-bottom: 5px; }
+
         .toggle-row { display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; }
         .toggle-row input { width: auto; margin-right: 10px; cursor: pointer; accent-color: #d4af37; }
         .toggle-row label { font-size: 12px; cursor: pointer; color: #ccc; }
-        
         .row { display: flex; gap: 10px; }
 
         /* --- PREVIEW --- */
@@ -44,19 +48,24 @@
         .card-wrapper { 
             width: 525px; height: 300px; border-radius: 16px; position: relative; 
             box-shadow: 0 30px 60px rgba(0,0,0,0.5); 
-            transform-style: preserve-3d; transition: transform 0.1s; cursor: grab;
+            transform-style: preserve-3d; transition: transform 0.1s; 
             overflow: hidden; transform-origin: center center;
+            background-color: #333; background-size: cover; background-position: center; background-repeat: no-repeat;
         }
+        
+        /* Move cursor when custom BG active */
+        .card-wrapper.has-custom-bg { cursor: move; } 
 
-        /* Themes */
+        /* --- THEMES --- */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
         .theme-ivory .c-gold-text { color: #8b6b3e !important; }
         .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
-        
-        /* New Themes (Condensed for brevity, full list maintained) */
+
+        /* Other themes */
         .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
+        .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
         .theme-midnight-blue { background: #1a237e; border: 1px solid #534bae; color: white; }
         .theme-rose-gold { background: linear-gradient(135deg, #111, #222); border: 2px solid #e6a4a4; color: #e6a4a4 !important; }
         .theme-rose-gold .c-couple { background: linear-gradient(135deg, #e6a4a4, #fcdbdb, #d47e7e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -64,9 +73,17 @@
         /* Utils */
         .foil-overlay { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: 0.3; background: url('https://www.transparenttextures.com/patterns/stardust.png'); pointer-events: none; }
         .glare { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%); pointer-events: none; z-index: 5; }
+        
+        .custom-bg-overlay { position: absolute; inset: 0; background: rgba(0,0,0, var(--overlay-opacity)); z-index: 1; display: none; pointer-events: none; }
+        .has-custom-bg .custom-bg-overlay { display: block; }
+        .has-custom-bg { border: none !important; color: white !important; }
+        .has-custom-bg .c-guest, .has-custom-bg .c-details, .has-custom-bg .c-val, .has-custom-bg .c-label { color: white !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .has-custom-bg .c-details { border-top-color: rgba(255,255,255,0.4) !important; }
+        .has-custom-bg .c-couple { -webkit-text-fill-color: white !important; background: none !important; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
+        .has-custom-bg .c-logo { text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
         /* Content */
-        .c-content { padding: 30px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 2; color: inherit; }
+        .c-content { padding: 30px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 2; color: inherit; pointer-events: none; }
         .c-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .c-logo { font-family: 'Great Vibes', cursive; font-size: 28px; color: inherit; opacity: 0.8; }
         .c-main { text-align: left; margin-top: 10px; }
@@ -91,7 +108,6 @@
         .btn-audio.playing { border-color: #d4af37; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
         
         .tap-hint { position: absolute; top: -40px; width: 100%; text-align: center; color: white; font-size: 12px; opacity: 0; transition: 0.5s; pointer-events: none; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         
         /* Dock */
         .guest-dock { 
@@ -146,10 +162,11 @@
         </div>
         <input type="text" id="inLink" placeholder="Google Maps / RSVP Link" oninput="updateCard()">
 
-        <div class="section-title">4. Aesthetics</div>
-        <select id="themeSel" onchange="updateCard()" style="height: 40px;">
+        <div class="section-title">4. Aesthetics & Background</div>
+        <select id="themeSel" onchange="updateCard()" style="height: 40px; margin-bottom: 15px;">
+            <option value="theme-none">-- No Theme (Use Custom Image) --</option>
             <optgroup label="Bestsellers">
-                <option value="theme-royal">Royal Midnight & Gold</option>
+                <option value="theme-royal" selected>Royal Midnight & Gold</option>
                 <option value="theme-maroon">Sabyasachi Maroon</option>
                 <option value="theme-ivory">Modern Ivory</option>
             </optgroup>
@@ -161,7 +178,26 @@
                 <option value="theme-rose-gold">Rose Gold Noir</option>
                 <option value="theme-platinum">Platinum Silver</option>
             </optgroup>
-            </select>
+        </select>
+        
+        <div style="border-top: 1px solid #444; padding-top: 10px; margin-bottom: 15px;">
+            <label style="font-size:11px; color:#aaa; margin-bottom:5px; display:block;">Or Upload Custom Photo (Wallpaper):</label>
+            <input type="file" id="bgInput" accept="image/*" onchange="handleBgUpload()">
+            
+            <div id="photoControls" style="display:none; margin-top:10px;">
+                <div class="range-label"><span>Zoom Level</span><span id="zoomVal">100%</span></div>
+                <input type="range" id="zoomRange" min="50" max="250" step="5" value="100" oninput="updatePhotoSettings()">
+                
+                <div class="range-label"><span>Background Darkness</span><span id="opVal">40%</span></div>
+                <input type="range" id="opRange" min="0" max="0.9" step="0.1" value="0.4" oninput="updatePhotoSettings()">
+                
+                <div style="font-size:10px; color:#b8860b; text-align:center; padding:5px; background:rgba(255,255,255,0.05); border-radius:4px; margin-bottom:10px;">
+                    <i class="fas fa-arrows-alt"></i> Drag card to position photo
+                </div>
+            </div>
+
+            <button onclick="clearCustomBg()" class="btn" style="background: #444; color: #fff; padding: 8px; font-size: 10px; min-width: auto; width: auto; margin-top:5px;">Clear Photo</button>
+        </div>
 
         <div class="action-bar">
             <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-image"></i> Save PNG</button>
@@ -173,7 +209,8 @@
     <div class="preview-panel">
         <div class="tap-hint" id="tapHint">👆 Tap card to open options</div>
         <div class="card-wrapper theme-royal" id="card" onclick="toggleDock()">
-             <div class="foil-overlay"></div>
+            <div class="custom-bg-overlay"></div>
+            <div class="foil-overlay"></div>
             <div class="glare" id="cardGlare"></div>
             
             <div class="c-content">
@@ -218,6 +255,12 @@
     <script>
         let qr;
         let isPlaying = false;
+        let customBgData = null; 
+        
+        // Background Position Vars
+        let bgPos = { x: 50, y: 50 }; // percentages
+        let isDragging = false;
+        let startPos = { x:0, y:0 };
 
         function init() {
             qr = new QRCode(document.getElementById("qrcode"), {
@@ -231,7 +274,40 @@
             document.getElementById('inDate').valueAsDate = today;
             document.getElementById('inTime').value = "16:30"; 
             updateCard();
-            initTilt();
+            initInteractions();
+        }
+
+        function handleBgUpload() {
+            const file = document.getElementById('bgInput').files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                customBgData = e.target.result;
+                document.getElementById('photoControls').style.display = 'block';
+                // Reset position on new upload
+                bgPos = { x: 50, y: 50 };
+                updateCard();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function updatePhotoSettings() {
+            const opacity = document.getElementById('opRange').value;
+            const zoom = document.getElementById('zoomRange').value;
+            
+            document.getElementById('opVal').innerText = Math.round(opacity * 100) + "%";
+            document.getElementById('zoomVal').innerText = zoom + "%";
+            
+            const card = document.getElementById('card');
+            card.style.setProperty('--overlay-opacity', opacity);
+            card.style.backgroundSize = zoom + "%";
+        }
+
+        function clearCustomBg() {
+            customBgData = null;
+            document.getElementById('bgInput').value = "";
+            document.getElementById('photoControls').style.display = 'none';
+            updateCard();
         }
 
         function updateCard() {
@@ -240,14 +316,11 @@
             document.getElementById('outGuest').innerText = document.getElementById('inGuest').value || "Guest Name";
             document.getElementById('outVenue').innerText = document.getElementById('inVenue').value || "Venue Name";
 
-            // Toggles
             const showGuest = document.getElementById('checkGuest').checked;
             document.getElementById('guestRow').style.display = showGuest ? 'flex' : 'none';
-
             const showQR = document.getElementById('checkQR').checked;
             document.getElementById('qrBox').style.display = showQR ? 'block' : 'none';
 
-            // Date & Time
             const dateVal = document.getElementById('inDate').value;
             let dateStr = "";
             if(dateVal) {
@@ -265,15 +338,28 @@
             }
             document.getElementById('outDate').innerHTML = dateStr + timeStr;
 
+            const card = document.getElementById('card');
             const theme = document.getElementById('themeSel').value;
-            document.getElementById('card').className = `card-wrapper ${theme}`;
+            
+            if (customBgData) {
+                card.className = `card-wrapper has-custom-bg`;
+                card.style.backgroundImage = `url(${customBgData})`;
+                card.style.color = 'white';
+                // Apply current position and zoom
+                card.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
+                const zoom = document.getElementById('zoomRange').value;
+                card.style.backgroundSize = zoom + "%";
+            } else {
+                card.className = `card-wrapper ${theme}`;
+                card.style.backgroundImage = '';
+            }
             
             const link = document.getElementById('inLink').value || "https://maps.google.com";
             qr.makeCode(link);
             document.getElementById('btnMap').href = link;
         }
         
-        function toggleDock() { document.getElementById('guestDock').classList.toggle('active'); }
+        function toggleDock() { if(!isDragging) document.getElementById('guestDock').classList.toggle('active'); }
         function toggleAudio() {
             const audio = document.getElementById('bgMusic');
             if(isPlaying) { audio.pause(); document.getElementById('audioBtn').classList.remove('playing'); } 
@@ -285,9 +371,7 @@
             const dateStr = document.getElementById('inDate').value.replaceAll('-', '');
             const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${document.getElementById('inName').value} Wedding\nLOCATION:${document.getElementById('inVenue').value}\nDTSTART;VALUE=DATE:${dateStr}\nEND:VEVENT\nEND:VCALENDAR`;
             const blob = new Blob([icsContent], { type: 'text/calendar' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'invite.ics';
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'invite.ics';
             link.click();
         }
 
@@ -312,16 +396,26 @@
             const venue = document.getElementById('outVenue').innerText;
             const tag = document.getElementById('outTag').innerText;
             const link = document.getElementById('inLink').value || "#";
+            const currentOpacity = document.getElementById('opRange').value;
+            const currentZoom = document.getElementById('zoomRange').value;
             
-            // Check Toggles
             const showGuest = document.getElementById('checkGuest').checked;
             const showQR = document.getElementById('checkQR').checked;
             
-            // Calendar Data
             const calTitle = document.getElementById('inName').value + " Wedding";
             const calVenue = document.getElementById('inVenue').value;
             const calDateVal = document.getElementById('inDate').value.replaceAll('-', '');
             const calStartTime = calDateVal + "T120000Z"; const calEndTime = calDateVal + "T180000Z";
+            
+            let bgCss = '';
+            let wrapperClass = theme;
+            let cssVars = '';
+            
+            if(customBgData) {
+                bgCss = `#card { background-image: url('${customBgData}') !important; background-position: ${bgPos.x}% ${bgPos.y}%; background-size: ${currentZoom}%; }`;
+                wrapperClass = 'has-custom-bg';
+                cssVars = `:root { --overlay-opacity: ${currentOpacity}; }`;
+            }
 
             const htmlContent = `
 <!DOCTYPE html>
@@ -335,13 +429,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
     <style>
         ${styles}
+        ${cssVars}
+        ${bgCss}
         body { margin: 0; overflow: hidden; background: #111; }
         .input-panel { display: none !important; }
         .preview-panel { width: 100vw; height: 100vh; padding: 0; margin: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
         .card-wrapper { transform-origin: center center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
         .guest-dock { width: 90%; justify-content: center; bottom: 40px; }
-        
-        /* Dynamic Visibility */
         ${showGuest ? '' : '#guestRow { display: none !important; }'}
         ${showQR ? '' : '#qrBox { display: none !important; }'}
     </style>
@@ -349,7 +443,8 @@
 <body>
     <div class="preview-panel">
         <div class="tap-hint" style="opacity:1; top:15%; width:100%; text-align:center; animation:bounce 2s infinite; z-index:200; pointer-events:none; color:white;">👆 Tap card options</div>
-        <div class="card-wrapper ${theme}" id="card" onclick="toggleDock()">
+        <div class="card-wrapper ${wrapperClass}" id="card" onclick="toggleDock()">
+             <div class="custom-bg-overlay"></div>
              <div class="foil-overlay"></div>
             <div class="glare" id="cardGlare"></div>
             <div class="c-content">
@@ -417,19 +512,54 @@ END:VCALENDAR\`;
             const a = document.createElement('a'); a.download = `LiveCard_${guest}.html`; a.href = URL.createObjectURL(blob); a.click();
         }
 
-        function initTilt() {
+        // --- NEW INTERACTION LOGIC (DRAG vs TILT) ---
+        function initInteractions() {
             const card = document.getElementById('card');
             const glare = document.getElementById('cardGlare');
             const container = document.querySelector('.preview-panel');
-            container.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-                const centerX = rect.width / 2; const centerY = rect.height / 2;
-                const rotateX = ((y - centerY) / centerY) * -10; const rotateY = ((x - centerX) / centerX) * 10;
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                glare.style.background = `linear-gradient(${rotateY * 10 + 115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
+
+            // Mouse Down (Start Drag)
+            card.addEventListener('mousedown', (e) => {
+                if(!customBgData) return;
+                isDragging = true;
+                startPos.x = e.clientX;
+                startPos.y = e.clientY;
+                card.style.cursor = 'grabbing';
             });
+
+            // Mouse Up (End Drag)
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                if(customBgData) card.style.cursor = 'move';
+            });
+
+            // Mouse Move (Tilt OR Drag)
+            container.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    // Dragging Logic
+                    const dx = e.clientX - startPos.x;
+                    const dy = e.clientY - startPos.y;
+                    
+                    // Convert pixels to small percentage steps for smooth panning
+                    bgPos.x += dx * 0.1;
+                    bgPos.y += dy * 0.1;
+                    
+                    card.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
+                    startPos.x = e.clientX;
+                    startPos.y = e.clientY;
+                } else {
+                    // Tilt Logic (Only if not dragging)
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2; const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -10; const rotateY = ((x - centerX) / centerX) * 10;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    glare.style.background = `linear-gradient(${rotateY * 10 + 115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
+                }
+            });
+
             container.addEventListener('mouseleave', () => {
+                isDragging = false;
                 card.style.transform = `rotateX(0) rotateY(0)`;
                 glare.style.background = `linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%)`;
             });
