@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
@@ -29,10 +30,13 @@
         .section-title { font-size: 10px; font-weight: 700; color: #d4af37; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
         
         input[type="text"], input[type="date"], input[type="time"], select { width: 100%; padding: 12px; background: #3d3d3d; border: 1px solid #555; color: white; border-radius: 6px; font-size: 13px; margin-bottom: 10px; transition: 0.3s; }
-        input:focus { border-color: #d4af37; outline: none; background: #454545; }
+        textarea { width: 100%; padding: 12px; background: #3d3d3d; border: 1px solid #555; color: white; border-radius: 6px; font-size: 12px; min-height: 100px; margin-bottom: 10px; }
+        input:focus, textarea:focus { border-color: #d4af37; outline: none; background: #454545; }
         input[type="file"] { background: none; border: none; padding: 0; font-size: 11px; color: #aaa; margin-bottom: 5px; width: 100%; }
+        
         input[type="range"] { width: 100%; accent-color: #d4af37; margin-bottom: 15px; cursor: pointer; }
         .range-label { font-size: 10px; color: #ccc; display: flex; justify-content: space-between; margin-bottom: 5px; }
+
         .toggle-row { display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; }
         .toggle-row input { width: auto; margin-right: 10px; cursor: pointer; accent-color: #d4af37; }
         .toggle-row label { font-size: 12px; cursor: pointer; color: #ccc; }
@@ -42,43 +46,37 @@
         .preview-panel { 
             flex: 1; 
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000); 
-            background-size: auto, cover; background-position: center;
+            background-size: auto, cover; background-position: center; background-repeat: no-repeat;
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            perspective: 1500px; position: relative; 
+            perspective: 1500px; position: relative; cursor: default;
         }
+        /* Cursor for page drag */
+        .preview-panel.can-drag { cursor: move; }
 
-        /* --- LAYERS --- */
-        .card-scene { width: 525px; height: 300px; position: relative; }
+        /* --- CARD SCENE & ANIMATION --- */
+        .card-scene { width: 525px; height: 300px; position: relative; pointer-events: none; /* Let clicks pass through scene unless hitting card */ }
         
-        /* Layer 1: Scaling (Responsive) */
         #card-scaler { width: 100%; height: 100%; transform-origin: center center; }
-
-        /* Layer 2: Floating Animation */
         #card-floater { width: 100%; height: 100%; transform-style: preserve-3d; }
         
-        /* Layer 3: Interaction (Flip/Drag) */
         .card-wrapper { 
-            width: 100%; height: 100%; position: relative; 
+            width: 100%; height: 100%; position: relative; pointer-events: auto; /* Re-enable clicks on card */
             transform-style: preserve-3d; 
-            transition: transform 0.1s linear; /* Fast for drag */
+            transition: transform 0.1s linear; 
             background-color: #333; background-size: cover; background-position: center;
             border-radius: 16px;
         }
         
-        /* Flip Transition override */
         .card-wrapper.flipping { transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card-wrapper.is-flipped { transform: rotateY(180deg); }
 
-        /* TRUE FLOAT ANIMATION */
         @keyframes floatEffect {
             0% { transform: translateY(0px) rotateX(0deg); }
-            50% { transform: translateY(-15px) rotateX(2deg); } /* Move UP and tilt back */
+            50% { transform: translateY(-15px) rotateX(2deg); } 
             100% { transform: translateY(0px) rotateX(0deg); }
         }
         
         .anim-active { animation: floatEffect 6s ease-in-out infinite; }
-        
-        /* Pause float on interaction */
         #card-floater:hover { animation-play-state: paused; }
 
         .card-face {
@@ -92,6 +90,13 @@
             transform: rotateY(180deg); background: #1a1a1a; border: 2px solid #d4af37;
             display: flex; flex-direction: column; justify-content: center; padding: 30px; color: white;
         }
+
+        /* --- BACK CONTENT --- */
+        .b-header { font-family: 'Great Vibes', cursive; font-size: 32px; color: #d4af37; text-align: center; margin-bottom: 20px; }
+        .b-timeline { display: flex; flex-direction: column; gap: 15px; }
+        .b-item { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .b-time { font-size: 11px; font-weight: bold; color: #d4af37; width: 60px; }
+        .b-event { font-size: 12px; font-family: 'Montserrat', sans-serif; opacity: 0.9; }
 
         /* --- THEMES --- */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
@@ -146,12 +151,6 @@
         .has-custom-bg .c-details { border-top-color: rgba(255,255,255,0.4) !important; }
 
         /* Content */
-        .b-header { font-family: 'Great Vibes', cursive; font-size: 32px; color: #d4af37; text-align: center; margin-bottom: 20px; }
-        .b-timeline { display: flex; flex-direction: column; gap: 15px; }
-        .b-item { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .b-time { font-size: 11px; font-weight: bold; color: #d4af37; width: 60px; }
-        .b-event { font-size: 12px; font-family: 'Montserrat', sans-serif; opacity: 0.9; }
-
         .c-content { padding: 30px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 4; color: inherit; pointer-events: none; }
         .c-top { display: flex; justify-content: space-between; }
         .c-logo { font-family: 'Great Vibes', cursive; font-size: 28px; opacity: 0.9; }
@@ -205,10 +204,33 @@
         <input type="text" id="inName" placeholder="Rahul & Anjali" oninput="updateCard()">
         <input type="text" id="inTag" placeholder="#RahulWedsAnjali" oninput="updateCard()">
 
-        <div class="section-title">2. Front: Details</div>
+        <div class="section-title">
+            <span>2. Personalization Mode</span>
+            <select id="genMode" onchange="toggleGenMode()" style="width: auto; padding: 5px; font-size: 11px;">
+                <option value="single">Single Guest</option>
+                <option value="bulk">Batch List (Bulk)</option>
+            </select>
+        </div>
+
         <div class="toggle-row"><input type="checkbox" id="checkGuest" checked onchange="updateCard()"><label>Show VIP Name</label></div>
+        
+        <div id="singleInput">
+            <div style="background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid rgba(212, 175, 55, 0.3);">
+                <input type="text" id="inGuest" placeholder="The Sharma Family" value="Mr. & Mrs. Sharma" style="margin-bottom:0; background:transparent; border:none; padding:5px 0; font-weight:bold; color:white;" oninput="updateCard()">
+            </div>
+        </div>
+
+        <div id="bulkInput" style="display:none;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                <label style="font-size:10px; color:#3b82f6; font-weight:bold;">PASTE GUEST LIST (One per line)</label>
+                <textarea id="bulkList" placeholder="Mr. Sharma&#10;Mrs. Anita&#10;The Kapoor Family"></textarea>
+                <div style="font-size:9px; color:#aaa;">*Generates a ZIP file with separate HTML cards for each name.</div>
+            </div>
+        </div>
+
         <div class="toggle-row"><input type="checkbox" id="checkQR" checked onchange="updateCard()"><label>Show QR Code</label></div>
-        <input type="text" id="inGuest" placeholder="The Sharma Family" value="Mr. & Mrs. Sharma" oninput="updateCard()">
+        
+        <div class="section-title">3. Event Logic</div>
         <div class="row">
             <input type="date" id="inDate" onchange="updateCard()">
             <input type="time" id="inTime" onchange="updateCard()">
@@ -217,7 +239,7 @@
         <input type="text" id="inLink" placeholder="Maps Link" oninput="updateCard()">
 
         <div class="section-title">
-            <span>3. Back: Itinerary</span>
+            <span>4. Back: Itinerary</span>
             <div style="display:flex; align-items:center;">
                 <input type="checkbox" id="checkBack" checked onchange="updateCard()" style="width:auto; margin:0 5px 0 0;">
                 <span style="font-size:10px; color:#aaa; font-weight:normal;">Enable</span>
@@ -230,7 +252,7 @@
             <div class="row"><input type="text" id="ev3Time" value="09:00 PM" oninput="updateCard()"><input type="text" id="ev3Name" value="Dinner & Dance" oninput="updateCard()"></div>
         </div>
 
-        <div class="section-title">4. Card Aesthetics</div>
+        <div class="section-title">5. Card Aesthetics</div>
         <select id="themeSel" onchange="updateCard()" style="height: 40px; margin-bottom: 15px;">
             <option value="theme-none">-- Custom (Photo/Video) --</option>
             <optgroup label="Bestsellers">
@@ -272,7 +294,7 @@
         
         <div class="toggle-row" style="background: rgba(212,175,55,0.1); padding:10px; border-radius:6px; margin-bottom:15px;">
             <input type="checkbox" id="checkLoop" checked onchange="updateCard()">
-            <label for="checkLoop" style="color:#d4af37; font-weight:bold;">Enable 3D Float</label>
+            <label for="checkLoop" style="color:#d4af37; font-weight:bold;">Enable Gentle Motion</label>
         </div>
         
         <div style="border-top: 1px solid #444; padding-top: 10px; margin-bottom: 15px;">
@@ -294,13 +316,20 @@
             <button onclick="clearCustomBg()" class="btn" style="background:#444; font-size:10px; padding:5px;">Clear Media</button>
         </div>
 
-        <div class="section-title">5. Page Background</div>
+        <div class="section-title">6. Page Background</div>
         <input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()">
+        <div id="pagePhotoControls" style="display:none; margin-top:10px;">
+            <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div>
+            <input type="range" id="pageZoomRange" min="50" max="250" step="5" value="100" oninput="updatePagePhotoSettings()">
+            <div style="font-size:10px; color:#b8860b; text-align:center; padding:5px; background:rgba(255,255,255,0.05); border-radius:4px; margin-bottom:10px;">
+                <i class="fas fa-arrows-alt"></i> Click background to drag
+            </div>
+        </div>
         <button onclick="clearPageBg()" class="btn" style="background: #444; color: #fff; padding: 5px; font-size: 10px; min-width: auto; width: auto;">Reset Page Background</button>
 
         <div class="action-bar">
             <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-image"></i> Save Front (PNG)</button>
-            <button class="btn btn-html" onclick="downloadHTML()"><i class="fas fa-bolt"></i> Save Live Card</button>
+            <button class="btn btn-html" id="dlBtn" onclick="downloadHTML()"><i class="fas fa-bolt"></i> Save Live Card</button>
         </div>
     </div>
 
@@ -313,13 +342,9 @@
             <div id="card-scaler">
                 <div id="card-floater" class="anim-active">
                     <div class="card-wrapper theme-royal" id="card" onclick="handleCardClick()">
-                        
                         <div class="card-face face-front" id="faceFront">
                             <video id="bgVideo" class="bg-video" loop muted playsinline autoplay></video>
-                            <div class="custom-bg-overlay"></div>
-                            <div class="foil-overlay"></div>
-                            <div class="glare" id="cardGlare"></div>
-                            
+                            <div class="custom-bg-overlay"></div><div class="foil-overlay"></div><div class="glare" id="cardGlare"></div>
                             <div class="c-content">
                                 <div class="c-top"><div class="c-logo" id="outTag">#RaNjali</div></div>
                                 <div class="c-main">
@@ -333,7 +358,6 @@
                                 <div class="c-qr-box" id="qrBox"><div id="qrcode"></div><div class="c-qr-label">RSVP</div></div>
                             </div>
                         </div>
-
                         <div class="card-face face-back">
                             <div class="b-header">Itinerary</div>
                             <div class="b-timeline">
@@ -343,7 +367,6 @@
                             </div>
                             <div style="margin-top:auto; font-size:10px; color:#888; text-align:center;">Scan QR on front for map</div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -362,26 +385,49 @@
         let customBgData = null; 
         let customVideoData = null; 
         let customPageBgData = null;
+        
+        // Card BG Pos
         let bgPos = { x: 50, y: 50 };
-        let isDragging = false; let startPos = { x:0, y:0 };
+        // Page BG Pos
+        let pageBgPos = { x: 50, y: 50 };
+        
+        let isDraggingCard = false; 
+        let isDraggingPage = false;
+        let startPos = { x:0, y:0 };
 
         function init() {
             qr = new QRCode(document.getElementById("qrcode"), { text: "https://example.com", width: 70, height: 70, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
             const today = new Date(); document.getElementById('inDate').valueAsDate = today; document.getElementById('inTime').value = "16:30"; 
-            updateCard(); initInteractions(); setScale(); // Initial scale
+            updateCard(); initInteractions(); setScale(); 
+        }
+
+        function toggleGenMode() {
+            const mode = document.getElementById('genMode').value;
+            const single = document.getElementById('singleInput');
+            const bulk = document.getElementById('bulkInput');
+            const btn = document.getElementById('dlBtn');
+            
+            if(mode === 'bulk') {
+                single.style.display = 'none';
+                bulk.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-users-cog"></i> Generate Batch (ZIP)';
+            } else {
+                single.style.display = 'block';
+                bulk.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-bolt"></i> Save Live Card';
+            }
         }
 
         function toggleFlip() {
             if(!document.getElementById('checkBack').checked) return;
-            isFlipped = !isFlipped;
-            const card = document.getElementById('card');
-            card.classList.add('flipping');
-            card.classList.toggle('is-flipped');
-            setTimeout(() => card.classList.remove('flipping'), 800);
+            if (!document.getElementById('checkLoop').checked) {
+                isFlipped = !isFlipped;
+                document.getElementById('card').classList.toggle('is-flipped');
+            }
         }
 
         function handleCardClick() {
-            if(!isDragging) toggleFlip();
+            if(!isDraggingCard) toggleFlip();
         }
 
         function handleBgUpload() {
@@ -416,6 +462,8 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 customPageBgData = e.target.result;
+                document.getElementById('pagePhotoControls').style.display = 'block';
+                pageBgPos = { x: 50, y: 50 };
                 updatePageTheme();
             }
             reader.readAsDataURL(file);
@@ -424,16 +472,29 @@
         function updatePageTheme() {
             const panel = document.querySelector('.preview-panel');
             if(customPageBgData) {
-                panel.style.background = `url(${customPageBgData}) no-repeat center center`;
-                panel.style.backgroundSize = 'cover';
+                const zoom = document.getElementById('pageZoomRange').value;
+                panel.style.background = `url(${customPageBgData}) no-repeat`;
+                panel.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
+                // If zoom is 100%, we treat it as 'cover', else explicit size
+                if(zoom == 100) panel.style.backgroundSize = 'cover';
+                else panel.style.backgroundSize = zoom + "%";
+                panel.classList.add('can-drag');
             } else {
                 panel.style.background = `url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000)`;
+                panel.classList.remove('can-drag');
             }
+        }
+        
+        function updatePagePhotoSettings() {
+            const zoom = document.getElementById('pageZoomRange').value;
+            document.getElementById('pageZoomVal').innerText = zoom + "%";
+            updatePageTheme();
         }
         
         function clearPageBg() {
             customPageBgData = null;
             document.getElementById('pageBgInput').value = "";
+            document.getElementById('pagePhotoControls').style.display = 'none';
             updatePageTheme();
         }
 
@@ -462,7 +523,6 @@
         }
 
         function updateCard() {
-            // Inputs
             const ids = ['inName','inTag','inGuest','inVenue','inLink'];
             const outs = ['outName','outTag','outGuest','outVenue','btnMap'];
             ids.forEach((id, i) => { 
@@ -472,7 +532,6 @@
                 else el.innerText = val;
             });
 
-            // Back Inputs
             document.getElementById('oEv1Time').innerText = document.getElementById('ev1Time').value;
             document.getElementById('oEv1Name').innerText = document.getElementById('ev1Name').value;
             document.getElementById('oEv2Time').innerText = document.getElementById('ev2Time').value;
@@ -480,7 +539,6 @@
             document.getElementById('oEv3Time').innerText = document.getElementById('ev3Time').value;
             document.getElementById('oEv3Name').innerText = document.getElementById('ev3Name').value;
 
-            // Toggles
             document.getElementById('guestRow').style.display = document.getElementById('checkGuest').checked ? 'flex' : 'none';
             document.getElementById('qrBox').style.display = document.getElementById('checkQR').checked ? 'block' : 'none';
             
@@ -489,7 +547,6 @@
             document.getElementById('btnFlipDock').style.display = showBack ? 'block' : 'none';
             if(!showBack && isFlipped) toggleFlip(); 
 
-            // Loop Logic (Applied to FLOATER, not wrapper)
             const isLoop = document.getElementById('checkLoop').checked;
             const floater = document.getElementById('card-floater');
             const hint = document.getElementById('hintText');
@@ -502,7 +559,6 @@
                 hint.innerText = showBack ? "👆 Tap to Flip" : "✨ Invitation";
             }
 
-            // Date
             const d = new Date(document.getElementById('inDate').value);
             const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
             const t = document.getElementById('inTime').value;
@@ -515,7 +571,6 @@
             }
             document.getElementById('outDate').innerHTML = dateStr + timeStr;
 
-            // Theme, Image, or Video
             const face = document.getElementById('faceFront');
             const vid = document.getElementById('bgVideo');
             const theme = document.getElementById('themeSel').value;
@@ -546,60 +601,72 @@
             qr.makeCode(document.getElementById('inLink').value || "http://google.com");
         }
 
-        // --- DRAG LOGIC (Applied to Wrapper) ---
+        // --- DRAG LOGIC (Dual Mode) ---
         function initInteractions() {
             const face = document.getElementById('faceFront');
             const container = document.querySelector('.preview-panel');
             const card = document.getElementById('card');
 
+            // 1. Card Drag
             face.addEventListener('mousedown', (e) => {
                 if(!customBgData && !customVideoData) return;
-                isDragging = true; startPos = { x: e.clientX, y: e.clientY };
+                isDraggingCard = true; startPos = { x: e.clientX, y: e.clientY };
                 face.style.cursor = 'grabbing';
                 e.stopPropagation(); 
             });
+            
+            // 2. Page Drag (Container)
+            container.addEventListener('mousedown', (e) => {
+                if(!customPageBgData) return;
+                // Ensure we didn't click card (though stopProp above handles it)
+                isDraggingPage = true; startPos = { x: e.clientX, y: e.clientY };
+                container.style.cursor = 'grabbing';
+            });
 
-            window.addEventListener('mouseup', () => { isDragging = false; if(customBgData||customVideoData) face.style.cursor = 'move'; });
+            window.addEventListener('mouseup', () => { 
+                isDraggingCard = false; isDraggingPage = false;
+                if(customBgData||customVideoData) face.style.cursor = 'move';
+                if(customPageBgData) container.style.cursor = 'move';
+            });
 
             container.addEventListener('mousemove', (e) => {
-                if (isDragging) {
+                // Card Drag Logic
+                if (isDraggingCard) {
                     const dx = e.clientX - startPos.x; const dy = e.clientY - startPos.y;
                     bgPos.x += dx * 0.1; bgPos.y += dy * 0.1;
-                    
-                    if(customVideoData) {
-                        document.getElementById('bgVideo').style.objectPosition = `${bgPos.x}% ${bgPos.y}%`;
-                    } else {
-                        face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
-                    }
+                    if(customVideoData) { document.getElementById('bgVideo').style.objectPosition = `${bgPos.x}% ${bgPos.y}%`; } 
+                    else { face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`; }
                     startPos = { x: e.clientX, y: e.clientY };
-                } else if(!document.getElementById('checkLoop').checked) {
-                    // Manual Tilt only if Float is OFF
-                    const rect = card.getBoundingClientRect();
+                } 
+                // Page Drag Logic
+                else if (isDraggingPage) {
+                    const dx = e.clientX - startPos.x; const dy = e.clientY - startPos.y;
+                    pageBgPos.x += dx * 0.05; pageBgPos.y += dy * 0.05; // Slower drag for page
+                    updatePageTheme(); // apply new pos
+                    startPos = { x: e.clientX, y: e.clientY };
+                }
+                // Tilt Logic (Only if not looping & not dragging page)
+                else if(!document.getElementById('checkLoop').checked) {
+                    const rect = document.getElementById('card').getBoundingClientRect();
                     const x = e.clientX - rect.left; const y = e.clientY - rect.top;
                     const centerX = rect.width / 2; const centerY = rect.height / 2;
                     const rotateX = ((y - centerY) / centerY) * -10; const rotateY = ((x - centerX) / centerX) * 10;
-                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    document.getElementById('card').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                     document.getElementById('cardGlare').style.background = `linear-gradient(${rotateY * 10 + 115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
                 }
             });
 
             container.addEventListener('mouseleave', () => {
-                isDragging = false;
+                isDraggingCard = false; isDraggingPage = false;
                 if(!document.getElementById('checkLoop').checked) {
-                    card.style.transform = `rotateX(0) rotateY(0)`;
+                    document.getElementById('card').style.transform = `rotateX(0) rotateY(0)`;
                 }
             });
         }
         
         function setScale() { 
-            const w = window.innerWidth; 
-            const scaler = document.getElementById('card-scaler');
-            if(w < 550) { 
-                const scale = (w - 40) / 525; 
-                scaler.style.transform = 'scale('+scale+')'; 
-            } else {
-                scaler.style.transform = 'scale(1)';
-            }
+            const w = window.innerWidth; const scaler = document.getElementById('card-scaler');
+            if(w < 550) { const scale = (w - 40) / 525; scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; }
         } 
         window.addEventListener('resize', setScale);
 
@@ -607,21 +674,14 @@
             const dateStr = document.getElementById('inDate').value.replaceAll('-', '');
             const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${document.getElementById('inName').value} Wedding\nLOCATION:${document.getElementById('inVenue').value}\nDTSTART;VALUE=DATE:${dateStr}\nEND:VEVENT\nEND:VCALENDAR`;
             const blob = new Blob([icsContent], { type: 'text/calendar' });
-            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'invite.ics';
-            link.click();
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'invite.ics'; link.click();
         }
 
         function downloadPNG() {
-            const floater = document.getElementById('card-floater');
-            const card = document.getElementById('card');
-            
-            // Freeze animations
+            const floater = document.getElementById('card-floater'); const card = document.getElementById('card');
             const wasAnim = floater.classList.contains('anim-active');
-            floater.classList.remove('anim-active');
-            floater.style.transform = 'none';
-            card.style.transform = "none";
+            floater.classList.remove('anim-active'); floater.style.transform = 'none'; card.style.transform = "none";
             document.getElementById('cardGlare').style.display = 'none';
-            
             html2canvas(document.getElementById('faceFront'), { scale: 3 }).then(canvas => {
                 const link = document.createElement('a'); link.download = 'Invite_Front.png'; link.href = canvas.toDataURL(); link.click();
                 document.getElementById('cardGlare').style.display = 'block';
@@ -630,6 +690,40 @@
         }
 
         function downloadHTML() {
+            const mode = document.getElementById('genMode').value;
+            
+            if(mode === 'bulk') {
+                // BULK MODE
+                const rawList = document.getElementById('bulkList').value;
+                const names = rawList.split('\n').filter(n => n.trim() !== '');
+                if(names.length === 0) { alert("Please enter names!"); return; }
+                
+                const zip = new JSZip();
+                
+                // We reuse the template generation logic
+                names.forEach((guestName) => {
+                    const htmlContent = generateCardHTML(guestName.trim());
+                    zip.file(`Invite_${guestName.trim().replace(/\s+/g, '_')}.html`, htmlContent);
+                });
+                
+                zip.generateAsync({type:"blob"}).then(function(content) {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = "Wedding_Invites.zip";
+                    link.click();
+                });
+                
+            } else {
+                // SINGLE MODE
+                const guestName = document.getElementById('outGuest').innerText;
+                const htmlContent = generateCardHTML(guestName);
+                const blob = new Blob([htmlContent], {type: 'text/html'});
+                const a = document.createElement('a'); a.download = `LiveCard_${guestName}.html`; a.href = URL.createObjectURL(blob); a.click();
+            }
+        }
+
+        function generateCardHTML(guestName) {
+            // Reuses current state but swaps name
             const styles = document.getElementsByTagName('style')[0].innerHTML;
             const theme = document.getElementById('themeSel').value;
             const name = document.getElementById('outName').innerText;
@@ -651,24 +745,23 @@
             let bgCss = ''; let wrapperClass = theme; let cssVars = ''; let videoHTML = '';
             
             if(customVideoData) {
-                const op = document.getElementById('opRange').value;
-                const zm = document.getElementById('zoomRange').value;
+                const op = document.getElementById('opRange').value; const zm = document.getElementById('zoomRange').value;
                 videoHTML = `<video class="bg-video" loop muted playsinline autoplay src="${customVideoData}" style="display:block; object-position: ${bgPos.x}% ${bgPos.y}%; transform: scale(${zm/100});"></video>`;
-                wrapperClass += ' has-custom-bg';
-                cssVars = `:root { --overlay-opacity: ${op}; --gold: #d4af37; --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); }`;
+                wrapperClass += ' has-custom-bg'; cssVars = `:root { --overlay-opacity: ${op}; --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); }`;
             } 
             else if(customBgData) {
-                const op = document.getElementById('opRange').value;
-                const zm = document.getElementById('zoomRange').value;
+                const op = document.getElementById('opRange').value; const zm = document.getElementById('zoomRange').value;
                 bgCss = `#faceFront { background-image: url('${customBgData}') !important; background-position: ${bgPos.x}% ${bgPos.y}%; background-size: ${zm}%; }`;
-                wrapperClass += ' has-custom-bg';
-                cssVars = `:root { --overlay-opacity: ${op}; --gold: #d4af37; --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); }`;
+                wrapperClass += ' has-custom-bg'; cssVars = `:root { --overlay-opacity: ${op}; --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); }`;
             }
+            if(isLoop) wrapperClass += ' auto-loop';
             
             // Page BG CSS for export
             let pageBgStyle = 'background: #111;';
             if(customPageBgData) {
-                pageBgStyle = `background: url('${customPageBgData}') no-repeat center center; background-size: cover;`;
+                const zoom = document.getElementById('pageZoomRange').value;
+                let sizeVal = zoom == 100 ? 'cover' : zoom + "%";
+                pageBgStyle = `background: url('${customPageBgData}') no-repeat; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; background-size: ${sizeVal};`;
             }
 
             const htmlContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;${pageBgStyle}} .input-panel{display:none} .preview-panel{width:100vw;height:100vh;margin:0;padding:0;background:none;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss}</style></head><body>
@@ -677,7 +770,7 @@
                 <div class="card-scene">
                     <div id="card-scaler">
                         <div id="card-floater" class="${isLoop ? 'anim-active' : ''}">
-                            <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.toggle('is-flipped')" : ""}">
+                            <div class="card-wrapper ${wrapperClass}" id="card" onclick="${showBack ? "this.classList.remove('auto-loop'); this.classList.toggle('is-flipped')" : ""}">
                                 <div class="card-face face-front" id="faceFront">
                                     ${videoHTML}
                                     <div class="custom-bg-overlay"></div><div class="foil-overlay"></div><div class="glare"></div>
@@ -695,7 +788,7 @@
                 <div class="guest-dock active" style="bottom:30px">
                     <a href="${document.getElementById('inLink').value}" target="_blank" class="dock-btn"><i class="fas fa-map-marker-alt"></i> Navigate</a>
                     <button onclick="addToCalendar()" class="dock-btn secondary"><i class="far fa-calendar-plus"></i> Calendar</button>
-                    ${showBack ? `<button onclick="document.getElementById('card').classList.toggle('is-flipped')" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>` : ''}
+                    ${showBack ? `<button onclick="document.getElementById('card').classList.remove('auto-loop'); document.getElementById('card').classList.toggle('is-flipped')" class="dock-btn secondary"><i class="fas fa-sync-alt"></i> Flip</button>` : ''}
                 </div>
             </div>
             <script>
@@ -720,9 +813,7 @@ END:VCALENDAR\`;
                 }
                 function setScale() { const w = window.innerWidth; const scaler = document.getElementById('card-scaler'); if(w < 550) { const scale = (w - 40) / 525; scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; } } window.addEventListener('resize', setScale); setScale();
             <\/script></body></html>`;
-            
-            const blob = new Blob([htmlContent], {type: 'text/html'});
-            const a = document.createElement('a'); a.download = `LiveCard.html`; a.href = URL.createObjectURL(blob); a.click();
+            return htmlContent;
         }
     </script>
 </body>
