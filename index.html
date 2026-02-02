@@ -27,7 +27,8 @@
         #fixed-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
-            background-size: auto, cover; background-position: center; background-repeat: no-repeat;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            transition: background-position 0.1s ease-out; /* Smooth drag */
         }
         #pageBgVideoEl {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -53,12 +54,12 @@
 
         /* --- PREVIEW AREA --- */
         .preview-panel { 
-            flex: 1; background: transparent; /* BG is now handled by #fixed-layer */
+            flex: 1; background: transparent; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             perspective: 1500px; position: relative; overflow: hidden; z-index: 1;
         }
-        .preview-panel.can-drag { cursor: move; } /* Interaction layer on top */
-        #drag-layer { position: absolute; inset: 0; z-index: 2; } /* Invisible layer for page drag */
+        .preview-panel.can-drag { cursor: move; } 
+        #drag-layer { position: absolute; inset: 0; z-index: 2; }
 
         /* --- CARD SCENE --- */
         .card-scene { width: 525px; height: 300px; position: relative; z-index: 5; pointer-events: none; }
@@ -118,7 +119,7 @@
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
         .theme-ivory .c-gold-text { color: #8b6b3e !important; }
         .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
-        /* (Shortened theme list for brevity, full list maintained in logic) */
+        /* (Themes Logic Persisted) */
         .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
         .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
         
@@ -139,7 +140,6 @@
         .btn-gold { background: linear-gradient(45deg, #d4af37, #b8860b); color: white; }
         .btn-html { background: #3b82f6; color: white; }
         .btn-cal { background: #2ecc71; color: white; }
-        .btn-share { background: #8e44ad; color: white; width: 100%; margin-bottom: 10px; }
         
         .tap-hint { position: absolute; top: -40px; width: 100%; text-align: center; color: white; font-size: 12px; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 10; }
         
@@ -188,24 +188,32 @@
         <input type="text" id="inTag" placeholder="#RahulWedsAnjali" oninput="updateCard()">
 
         <div class="section-title">
-            <span>2. Personalization</span>
+            <span>2. Personalization Mode</span>
             <select id="genMode" onchange="toggleGenMode()" style="width: auto; padding: 5px; font-size: 11px;">
                 <option value="single">Single Guest</option>
                 <option value="bulk">Batch List (Bulk)</option>
             </select>
         </div>
+
         <div class="toggle-row"><input type="checkbox" id="checkGuest" checked onchange="updateCard()"><label>Show VIP Name</label></div>
+        
         <div id="singleInput">
             <div style="background: rgba(212, 175, 55, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid rgba(212, 175, 55, 0.3);">
                 <input type="text" id="inGuest" placeholder="The Sharma Family" value="Mr. & Mrs. Sharma" oninput="updateCard()" style="margin-bottom:0; background:transparent; border:none; padding:5px 0; font-weight:bold; color:white;">
             </div>
         </div>
+
         <div id="bulkInput" style="display:none;">
-            <textarea id="bulkList" placeholder="Mr. Sharma&#10;Mrs. Anita"></textarea>
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                <label style="font-size:10px; color:#3b82f6; font-weight:bold;">PASTE GUEST LIST (One per line)</label>
+                <textarea id="bulkList" placeholder="Mr. Sharma&#10;Mrs. Anita&#10;The Kapoor Family"></textarea>
+                <div style="font-size:9px; color:#aaa;">*Generates a ZIP file with separate HTML cards for each name.</div>
+            </div>
         </div>
+
         <div class="toggle-row"><input type="checkbox" id="checkQR" checked onchange="updateCard()"><label>Show QR Code</label></div>
         
-        <div class="section-title">3. Event Details</div>
+        <div class="section-title">3. Event Logic</div>
         <div class="row"><input type="date" id="inDate" onchange="updateCard()"><input type="time" id="inTime" onchange="updateCard()"></div>
         <input type="text" id="inVenue" placeholder="Venue Name" oninput="updateCard()">
         <input type="text" id="inLink" placeholder="Maps Link" oninput="updateCard()">
@@ -217,7 +225,7 @@
             <div class="row"><input type="text" id="ev3Time" value="09:00 PM" oninput="updateCard()"><input type="text" id="ev3Name" value="Dinner & Dance" oninput="updateCard()"></div>
         </div>
 
-        <div class="section-title">5. Aesthetics</div>
+        <div class="section-title">5. Card Aesthetics</div>
         <select id="themeSel" onchange="updateCard()">
             <option value="theme-royal">Royal Midnight</option>
             <option value="theme-maroon">Sabyasachi Maroon</option>
@@ -235,22 +243,23 @@
         </div>
         <button onclick="clearCustomBg()" class="btn" style="background:#444; font-size:10px;">Clear Media</button>
 
-        <div class="section-title">Page Background</div>
+        <div class="section-title">6. Page Background (Image OR Video)</div>
         <div class="row"><input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()"><input type="file" id="pageVidInput" accept="video/*" onchange="handlePageVideoUpload()"></div>
         <div id="pagePhotoControls" style="display:none;">
-            <div class="range-label"><span>Zoom</span><span id="pageZoomVal">Cover</span></div><input type="range" id="pageZoomRange" min="50" max="250" value="100" oninput="updatePagePhotoSettings()">
+            <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div><input type="range" id="pageZoomRange" min="50" max="250" value="100" oninput="updatePagePhotoSettings()">
+            <div style="font-size:9px; color:#aaa; text-align:center;">Click background to drag</div>
         </div>
         <button onclick="clearPageBg()" class="btn" style="background:#444; font-size:10px;">Reset Page</button>
 
         <div class="action-bar">
-            <button class="btn btn-share" onclick="smartShare()"><i class="fas fa-share-alt"></i> Share Bundle (Img+HTML)</button>
-            <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-image"></i> Save PNG</button>
+            <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-image"></i> Save Front (PNG)</button>
             <button class="btn btn-html" id="dlBtn" onclick="downloadHTML()"><i class="fas fa-bolt"></i> Save Live Card</button>
         </div>
     </div>
 
     <div class="preview-panel">
-        <div id="drag-layer"></div> <div class="tap-hint" id="tapHint" style="color:white; opacity:0.7; margin-bottom:10px;">
+        <div id="drag-layer"></div>
+        <div class="tap-hint" id="tapHint" style="color:white; opacity:0.7; margin-bottom:10px;">
             <span id="hintText">👆 Tap to Flip</span>
         </div>
         
@@ -306,43 +315,6 @@
             qr = new QRCode(document.getElementById("qrcode"), { text: "https://example.com", width: 70, height: 70, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
             const today = new Date(); document.getElementById('inDate').valueAsDate = today; document.getElementById('inTime').value = "16:30"; 
             updateCard(); initInteractions(); setScale(); 
-        }
-
-        // --- SMART SHARE FEATURE ---
-        async function smartShare() {
-            // 1. Generate PNG
-            const canvas = await html2canvas(document.getElementById('faceFront'), { scale: 2 });
-            const blobPNG = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-            const filePNG = new File([blobPNG], 'Invite_Preview.png', { type: 'image/png' });
-
-            // 2. Generate HTML
-            const guestName = document.getElementById('outGuest').innerText;
-            const htmlContent = generateCardHTML(guestName);
-            const blobHTML = new Blob([htmlContent], { type: 'text/html' });
-            const fileHTML = new File([blobHTML], `Invite_${guestName}.html`, { type: 'text/html' });
-
-            // 3. Try Native Share
-            if (navigator.canShare && navigator.canShare({ files: [filePNG, fileHTML] })) {
-                try {
-                    await navigator.share({
-                        title: 'Wedding Invitation',
-                        text: `Special invite for ${guestName}`,
-                        files: [filePNG, fileHTML]
-                    });
-                } catch (err) { console.log('Share failed', err); fallbackZip(blobPNG, blobHTML, guestName); }
-            } else {
-                // Fallback to ZIP
-                fallbackZip(blobPNG, blobHTML, guestName);
-            }
-        }
-
-        function fallbackZip(blobPNG, blobHTML, name) {
-            const zip = new JSZip();
-            zip.file("Preview.png", blobPNG);
-            zip.file(`Invite_${name}.html`, blobHTML);
-            zip.generateAsync({type:"blob"}).then(content => {
-                const link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = `Invite_Bundle_${name}.zip`; link.click();
-            });
         }
 
         // --- Interaction Logic ---
@@ -473,49 +445,65 @@
             const dragLayer = document.getElementById('drag-layer');
             const card = document.getElementById('card');
 
-            // Card Drag
-            face.addEventListener('mousedown', (e) => {
+            // Mouse & Touch events for CARD Drag
+            const startCardDrag = (e) => {
                 if(!customBgData && !customVideoData) return;
-                isDraggingCard = true; startPos = { x: e.clientX, y: e.clientY };
+                isDraggingCard = true; 
+                startPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
                 face.style.cursor = 'grabbing'; e.stopPropagation(); 
-            });
+            };
+            face.addEventListener('mousedown', startCardDrag);
+            face.addEventListener('touchstart', startCardDrag);
             
-            // Page Drag
-            dragLayer.addEventListener('mousedown', (e) => {
+            // Mouse & Touch events for PAGE Drag
+            const startPageDrag = (e) => {
                 if(!customPageBgData && !customPageVideoData) return;
-                isDraggingPage = true; startPos = { x: e.clientX, y: e.clientY };
+                isDraggingPage = true; 
+                startPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
                 dragLayer.style.cursor = 'grabbing';
-            });
+            };
+            dragLayer.addEventListener('mousedown', startPageDrag);
+            dragLayer.addEventListener('touchstart', startPageDrag);
 
-            window.addEventListener('mouseup', () => { 
+            const endDrag = () => { 
                 isDraggingCard = false; isDraggingPage = false;
                 if(customBgData||customVideoData) face.style.cursor = 'move';
                 dragLayer.style.cursor = 'default';
-            });
+            };
+            window.addEventListener('mouseup', endDrag);
+            window.addEventListener('touchend', endDrag);
 
-            window.addEventListener('mousemove', (e) => {
+            const onMove = (e) => {
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+
                 if (isDraggingCard) {
-                    const dx = e.clientX - startPos.x; const dy = e.clientY - startPos.y;
+                    const dx = clientX - startPos.x; const dy = clientY - startPos.y;
                     bgPos.x += dx * 0.1; bgPos.y += dy * 0.1;
                     if(customVideoData) document.getElementById('bgVideo').style.objectPosition = `${bgPos.x}% ${bgPos.y}%`;
                     else face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
-                    startPos = { x: e.clientX, y: e.clientY };
+                    startPos = { x: clientX, y: clientY };
                 } 
                 else if (isDraggingPage) {
-                    const dx = e.clientX - startPos.x; const dy = e.clientY - startPos.y;
+                    const dx = clientX - startPos.x; const dy = clientY - startPos.y;
                     pageBgPos.x += dx * 0.05; pageBgPos.y += dy * 0.05; 
-                    updatePageTheme(); startPos = { x: e.clientX, y: e.clientY };
+                    updatePageTheme(); startPos = { x: clientX, y: clientY };
                 }
                 else if(!document.getElementById('checkLoop').checked) {
-                    // Manual Tilt
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2; const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -10; const rotateY = ((x - centerX) / centerX) * 10;
-                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                    document.getElementById('cardGlare').style.background = `linear-gradient(${rotateY*10+115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
+                    // Manual Tilt (Mouse Only for now to prevent jitter on touch)
+                    if(e.type === 'mousemove') {
+                        const rect = card.getBoundingClientRect();
+                        const x = clientX - rect.left; const y = clientY - rect.top;
+                        const centerX = rect.width / 2; const centerY = rect.height / 2;
+                        const rotateX = ((y - centerY) / centerY) * -10; const rotateY = ((x - centerX) / centerX) * 10;
+                        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                        document.getElementById('cardGlare').style.background = `linear-gradient(${rotateY*10+115}deg, transparent 40%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.0) 50%)`;
+                    }
                 }
-            });
+            };
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove);
+
             window.addEventListener('mouseleave', () => {
                 isDraggingCard = false; isDraggingPage = false;
                 if(!document.getElementById('checkLoop').checked) card.style.transform = `rotateX(0) rotateY(0)`;
@@ -609,6 +597,7 @@
             return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss} ${pageBgStyle}</style></head><body>
             ${pageVideoHTML || '<div id="fixed-layer"></div>'}
             <div class="preview-panel">
+                <div id="drag-layer"></div>
                 <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : (showBack ? '👆 Tap to Flip' : '✨ Invitation')}</div>
                 <div class="card-scene">
                     <div id="card-scaler">
@@ -646,9 +635,19 @@
                     const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'invite.ics';
                     document.body.appendChild(link); link.click(); document.body.removeChild(link);
                 }
-                function setScale() { const w = window.innerWidth; const h = window.innerHeight; const scaler = document.getElementById('card-scaler'); let scale = 1; if(w < 550) scale = (w - 40) / 525; const reqH = 450; if(h < reqH) { const hScale = (h - 140) / 300; if(hScale < scale) scale = hScale; } if(scale < 1) scaler.style.transform = 'scale('+scale+')'; else scaler.style.transform = 'scale(1)'; } 
+                function setScale() { 
+                    const w = window.innerWidth; 
+                    const h = window.innerHeight;
+                    const scaler = document.getElementById('card-scaler'); 
+                    let scale = 1;
+                    if(w < 550) { scale = (w - 40) / 525; }
+                    const requiredHeight = 400; 
+                    if (h < requiredHeight) { const hScale = (h - 140) / 300; if (hScale < scale) scale = hScale; }
+                    if(w < 550 || h < requiredHeight) { scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; } 
+                } 
                 window.addEventListener('resize', setScale); setScale();
             <\/script></body></html>`;
+            return htmlContent;
         }
     </script>
 </body>
