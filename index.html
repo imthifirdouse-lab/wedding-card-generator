@@ -28,7 +28,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
             background-size: cover; background-position: center; background-repeat: no-repeat;
-            transition: background-position 0.1s ease-out; /* Smooth drag */
+            transition: background-position 0.05s linear; /* Fast response for drag */
         }
         #pageBgVideoEl {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -58,7 +58,8 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             perspective: 1500px; position: relative; overflow: hidden; z-index: 1;
         }
-        .preview-panel.can-drag { cursor: move; } 
+        .preview-panel.can-drag { cursor: grab; } 
+        .preview-panel.is-dragging { cursor: grabbing; }
         #drag-layer { position: absolute; inset: 0; z-index: 2; }
 
         /* --- CARD SCENE --- */
@@ -70,8 +71,9 @@
             width: 100%; height: 100%; position: relative; pointer-events: auto; 
             transform-style: preserve-3d; transition: transform 0.1s linear; 
             background-color: #333; background-size: cover; background-position: center;
-            border-radius: 16px;
+            border-radius: 16px; cursor: grab;
         }
+        .card-wrapper.is-dragging { cursor: grabbing; }
         .card-wrapper.flipping { transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card-wrapper.is-flipped { transform: rotateY(180deg); }
 
@@ -122,6 +124,36 @@
         /* (Themes Logic Persisted) */
         .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
         .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
+        .theme-mehendi { background: linear-gradient(135deg, #388e3c, #1b5e20); border: 2px dashed #a5d6a7; color: white; }
+        .theme-haldi { background: linear-gradient(135deg, #ffeb3b, #fbc02d); color: #5d4037 !important; border: 2px solid #fff; }
+        .theme-haldi .c-couple { background: none; -webkit-text-fill-color: #5d4037; }
+        .theme-rajasthani { background: radial-gradient(circle, #e91e63, #880e4f); border: 3px solid #ffc107; color: white; }
+        .theme-midnight-blue { background: #1a237e; border: 1px solid #534bae; color: white; }
+        .theme-charcoal { background: #212121; border-left: 15px solid #616161; color: white; }
+        .theme-blush { background: linear-gradient(135deg, #fce4ec, #f8bbd0); color: #880e4f !important; border: 1px solid #f48fb1; }
+        .theme-blush .c-couple { background: none; -webkit-text-fill-color: #880e4f; }
+        .theme-blush .c-guest { color: #880e4f !important; }
+        .theme-sage { background: #dcedc8; color: #33691e !important; border: none; }
+        .theme-sage .c-couple { -webkit-text-fill-color: #33691e; background: none; }
+        .theme-marble { background: #f5f5f5; background-image: url('https://www.transparenttextures.com/patterns/white-diamond-dark.png'); color: #212121 !important; border: 1px solid #ddd; }
+        .theme-marble .c-couple { -webkit-text-fill-color: #000; background: none; }
+        .theme-rose-gold { background: linear-gradient(135deg, #111, #222); border: 2px solid #e6a4a4; color: #e6a4a4 !important; }
+        .theme-rose-gold .c-couple { background: linear-gradient(135deg, #e6a4a4, #fcdbdb, #d47e7e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .theme-platinum { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #212121 !important; border: 1px solid #9e9e9e; }
+        .theme-platinum .c-couple { -webkit-text-fill-color: #424242; background: none; }
+        .theme-emerald { background: linear-gradient(135deg, #004d40, #00251a); border: 2px solid #4db6ac; color: #e0f2f1; }
+        .theme-sapphire { background: linear-gradient(135deg, #0d47a1, #002171); border: 1px solid #64b5f6; color: #e3f2fd; }
+        .theme-lavender { background: linear-gradient(135deg, #ede7f6, #d1c4e9); color: #4a148c !important; }
+        .theme-lavender .c-couple { -webkit-text-fill-color: #4a148c; background: none; }
+        .theme-forest { background: #1b5e20; border-right: 20px solid #a5d6a7; color: white; }
+        .theme-beach { background: linear-gradient(180deg, #81d4fa 0%, #e1f5fe 100%); color: #01579b !important; }
+        .theme-beach .c-couple { -webkit-text-fill-color: #01579b; background: none; }
+        .theme-retro { background: #f4e1d2; color: #bf360c !important; font-family: 'Courier New', monospace; border: 2px dashed #bf360c; }
+        .theme-retro .c-couple { font-family: 'Courier New', monospace; -webkit-text-fill-color: #bf360c; background: none; letter-spacing: -2px; }
+        .theme-cyber { background: #000; border: 2px solid #00ff00; color: #00ff00 !important; font-family: 'Courier New', monospace; }
+        .theme-cyber .c-couple { -webkit-text-fill-color: #00ff00; background: none; text-shadow: 0 0 10px #00ff00; }
+        .theme-bollywood { background: radial-gradient(circle, #ffeb3b, #f57f17); color: #b71c1c !important; border: 4px dotted #b71c1c; }
+        .theme-bollywood .c-couple { -webkit-text-fill-color: #b71c1c; background: none; font-weight: 800; }
         
         .foil-overlay { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: 0.3; background: url('https://www.transparenttextures.com/patterns/stardust.png'); pointer-events: none; z-index: 3; }
         .glare { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%); pointer-events: none; z-index: 5; }
@@ -226,12 +258,30 @@
         </div>
 
         <div class="section-title">5. Card Aesthetics</div>
-        <select id="themeSel" onchange="updateCard()">
+        <select id="themeSel" onchange="updateCard()" style="height:40px; margin-bottom:15px;">
             <option value="theme-royal">Royal Midnight</option>
             <option value="theme-maroon">Sabyasachi Maroon</option>
             <option value="theme-ivory">Modern Ivory</option>
             <option value="theme-banarasi">Banarasi Silk</option>
-            <option value="theme-kanjeevaram">Kanjeevaram</option>
+            <option value="theme-kanjeevaram">Kanjeevaram Orange</option>
+            <option value="theme-mehendi">Mehendi Green</option>
+            <option value="theme-haldi">Haldi Yellow</option>
+            <option value="theme-rajasthani">Rajasthani Pink</option>
+            <option value="theme-midnight-blue">Midnight Blue</option>
+            <option value="theme-charcoal">Matte Charcoal</option>
+            <option value="theme-blush">Soft Blush Pink</option>
+            <option value="theme-sage">Sage Green (Eco)</option>
+            <option value="theme-marble">Carrara Marble</option>
+            <option value="theme-rose-gold">Rose Gold Noir</option>
+            <option value="theme-platinum">Platinum Silver</option>
+            <option value="theme-emerald">Royal Emerald</option>
+            <option value="theme-sapphire">Deep Sapphire</option>
+            <option value="theme-lavender">Lavender Haze</option>
+            <option value="theme-forest">Deep Forest</option>
+            <option value="theme-beach">Ocean Breeze</option>
+            <option value="theme-retro">Vintage 90s</option>
+            <option value="theme-cyber">Cyber Neon</option>
+            <option value="theme-bollywood">Bollywood Drama</option>
         </select>
         <div class="toggle-row"><input type="checkbox" id="checkLoop" checked onchange="updateCard()"><label>Enable Gentle Motion</label></div>
         
@@ -445,7 +495,7 @@
             const dragLayer = document.getElementById('drag-layer');
             const card = document.getElementById('card');
 
-            // Mouse & Touch events for CARD Drag
+            // Card Drag
             const startCardDrag = (e) => {
                 if(!customBgData && !customVideoData) return;
                 isDraggingCard = true; 
@@ -455,7 +505,7 @@
             face.addEventListener('mousedown', startCardDrag);
             face.addEventListener('touchstart', startCardDrag);
             
-            // Mouse & Touch events for PAGE Drag
+            // Page Drag
             const startPageDrag = (e) => {
                 if(!customPageBgData && !customPageVideoData) return;
                 isDraggingPage = true; 
@@ -479,18 +529,18 @@
 
                 if (isDraggingCard) {
                     const dx = clientX - startPos.x; const dy = clientY - startPos.y;
-                    bgPos.x += dx * 0.1; bgPos.y += dy * 0.1;
+                    bgPos.x += dx * 0.2; bgPos.y += dy * 0.2;
                     if(customVideoData) document.getElementById('bgVideo').style.objectPosition = `${bgPos.x}% ${bgPos.y}%`;
                     else face.style.backgroundPosition = `${bgPos.x}% ${bgPos.y}%`;
                     startPos = { x: clientX, y: clientY };
                 } 
                 else if (isDraggingPage) {
                     const dx = clientX - startPos.x; const dy = clientY - startPos.y;
-                    pageBgPos.x += dx * 0.05; pageBgPos.y += dy * 0.05; 
+                    pageBgPos.x += dx * 0.2; pageBgPos.y += dy * 0.2; 
                     updatePageTheme(); startPos = { x: clientX, y: clientY };
                 }
-                else if(!document.getElementById('checkLoop').checked) {
-                    // Manual Tilt (Mouse Only for now to prevent jitter on touch)
+                else if(!document.getElementById('checkLoop').checked && !isDraggingCard && !isDraggingPage) {
+                    // Manual Tilt
                     if(e.type === 'mousemove') {
                         const rect = card.getBoundingClientRect();
                         const x = clientX - rect.left; const y = clientY - rect.top;
@@ -513,7 +563,10 @@
         function setScale() { 
             const w = window.innerWidth; const h = window.innerHeight; const scaler = document.getElementById('card-scaler'); 
             let scale = 1; if(w < 550) scale = (w - 40) / 525;
-            const reqH = 450; if(h < reqH) { const hScale = (h - 140) / 300; if(hScale < scale) scale = hScale; }
+            // Relaxed height logic: only shrink if extremely short
+            const reqH = 450; 
+            // if (h < reqH) { const hScale = (h - 140) / 300; if (hScale < scale) scale = hScale; } 
+            
             if(scale < 1) scaler.style.transform = `scale(${scale})`; else scaler.style.transform = 'scale(1)';
         } 
         window.addEventListener('resize', setScale);
@@ -597,7 +650,6 @@
             return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss} ${pageBgStyle}</style></head><body>
             ${pageVideoHTML || '<div id="fixed-layer"></div>'}
             <div class="preview-panel">
-                <div id="drag-layer"></div>
                 <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : (showBack ? '👆 Tap to Flip' : '✨ Invitation')}</div>
                 <div class="card-scene">
                     <div id="card-scaler">
