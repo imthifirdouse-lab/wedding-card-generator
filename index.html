@@ -23,12 +23,12 @@
         * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); display: flex; height: 100vh; margin: 0; color: var(--text); overflow: hidden; }
 
-        /* --- FIXED BACKGROUND LAYER (Mobile Fix) --- */
+        /* --- FIXED BACKGROUND LAYER --- */
         #fixed-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
-            background-color: #111;
-            background-position: center; background-repeat: no-repeat;
-            transition: background-position 0.05s linear; /* Fast response for drag */
+            background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            transition: background-position 0.05s linear;
         }
         #pageBgVideoEl {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -51,6 +51,10 @@
         .toggle-row input { width: auto; margin-right: 10px; cursor: pointer; accent-color: #d4af37; }
         .toggle-row label { font-size: 12px; cursor: pointer; color: #ccc; }
         .row { display: flex; gap: 10px; }
+
+        /* Audio Trimmer */
+        .trimmer-box { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid #444; margin-top: 10px; display: none; }
+        .audio-wave { height: 20px; background: repeating-linear-gradient(90deg, #444, #444 2px, transparent 2px, transparent 4px); margin-bottom: 10px; opacity: 0.5; }
 
         /* --- PREVIEW AREA --- */
         .preview-panel { 
@@ -115,45 +119,30 @@
         .c-val { font-size: 11px; font-weight: 700; font-family: 'Playfair Display', serif; }
         .c-qr-box { position: absolute; bottom: 25px; right: 25px; background: white; padding: 4px; border-radius: 6px; }
 
-        /* THEMES */
+        /* THEMES (ALL INCLUDED) */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
-        .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; }
-        .theme-ivory .c-gold-text { color: #8b6b3e !important; }
-        .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
-        /* (Themes Logic Persisted) */
+        .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; } .theme-ivory .c-gold-text { color: #8b6b3e !important; } .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
         .theme-banarasi { background: linear-gradient(135deg, #ff0055, #80002a); border: 4px double #ffd700; color: #fff; }
         .theme-kanjeevaram { background: linear-gradient(to right, #e65100, #bf360c); border-top: 10px solid #d4af37; border-bottom: 10px solid #d4af37; color: white; }
         .theme-mehendi { background: linear-gradient(135deg, #388e3c, #1b5e20); border: 2px dashed #a5d6a7; color: white; }
-        .theme-haldi { background: linear-gradient(135deg, #ffeb3b, #fbc02d); color: #5d4037 !important; border: 2px solid #fff; }
-        .theme-haldi .c-couple { background: none; -webkit-text-fill-color: #5d4037; }
+        .theme-haldi { background: linear-gradient(135deg, #ffeb3b, #fbc02d); color: #5d4037 !important; border: 2px solid #fff; } .theme-haldi .c-couple { background: none; -webkit-text-fill-color: #5d4037; }
         .theme-rajasthani { background: radial-gradient(circle, #e91e63, #880e4f); border: 3px solid #ffc107; color: white; }
         .theme-midnight-blue { background: #1a237e; border: 1px solid #534bae; color: white; }
         .theme-charcoal { background: #212121; border-left: 15px solid #616161; color: white; }
-        .theme-blush { background: linear-gradient(135deg, #fce4ec, #f8bbd0); color: #880e4f !important; border: 1px solid #f48fb1; }
-        .theme-blush .c-couple { background: none; -webkit-text-fill-color: #880e4f; }
-        .theme-blush .c-guest { color: #880e4f !important; }
-        .theme-sage { background: #dcedc8; color: #33691e !important; border: none; }
-        .theme-sage .c-couple { -webkit-text-fill-color: #33691e; background: none; }
-        .theme-marble { background: #f5f5f5; background-image: url('https://www.transparenttextures.com/patterns/white-diamond-dark.png'); color: #212121 !important; border: 1px solid #ddd; }
-        .theme-marble .c-couple { -webkit-text-fill-color: #000; background: none; }
-        .theme-rose-gold { background: linear-gradient(135deg, #111, #222); border: 2px solid #e6a4a4; color: #e6a4a4 !important; }
-        .theme-rose-gold .c-couple { background: linear-gradient(135deg, #e6a4a4, #fcdbdb, #d47e7e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .theme-platinum { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #212121 !important; border: 1px solid #9e9e9e; }
-        .theme-platinum .c-couple { -webkit-text-fill-color: #424242; background: none; }
+        .theme-blush { background: linear-gradient(135deg, #fce4ec, #f8bbd0); color: #880e4f !important; border: 1px solid #f48fb1; } .theme-blush .c-couple { background: none; -webkit-text-fill-color: #880e4f; } .theme-blush .c-guest { color: #880e4f !important; }
+        .theme-sage { background: #dcedc8; color: #33691e !important; border: none; } .theme-sage .c-couple { -webkit-text-fill-color: #33691e; background: none; }
+        .theme-marble { background: #f5f5f5; background-image: url('https://www.transparenttextures.com/patterns/white-diamond-dark.png'); color: #212121 !important; border: 1px solid #ddd; } .theme-marble .c-couple { -webkit-text-fill-color: #000; background: none; }
+        .theme-rose-gold { background: linear-gradient(135deg, #111, #222); border: 2px solid #e6a4a4; color: #e6a4a4 !important; } .theme-rose-gold .c-couple { background: linear-gradient(135deg, #e6a4a4, #fcdbdb, #d47e7e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .theme-platinum { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #212121 !important; border: 1px solid #9e9e9e; } .theme-platinum .c-couple { -webkit-text-fill-color: #424242; background: none; }
         .theme-emerald { background: linear-gradient(135deg, #004d40, #00251a); border: 2px solid #4db6ac; color: #e0f2f1; }
         .theme-sapphire { background: linear-gradient(135deg, #0d47a1, #002171); border: 1px solid #64b5f6; color: #e3f2fd; }
-        .theme-lavender { background: linear-gradient(135deg, #ede7f6, #d1c4e9); color: #4a148c !important; }
-        .theme-lavender .c-couple { -webkit-text-fill-color: #4a148c; background: none; }
+        .theme-lavender { background: linear-gradient(135deg, #ede7f6, #d1c4e9); color: #4a148c !important; } .theme-lavender .c-couple { -webkit-text-fill-color: #4a148c; background: none; }
         .theme-forest { background: #1b5e20; border-right: 20px solid #a5d6a7; color: white; }
-        .theme-beach { background: linear-gradient(180deg, #81d4fa 0%, #e1f5fe 100%); color: #01579b !important; }
-        .theme-beach .c-couple { -webkit-text-fill-color: #01579b; background: none; }
-        .theme-retro { background: #f4e1d2; color: #bf360c !important; font-family: 'Courier New', monospace; border: 2px dashed #bf360c; }
-        .theme-retro .c-couple { font-family: 'Courier New', monospace; -webkit-text-fill-color: #bf360c; background: none; letter-spacing: -2px; }
-        .theme-cyber { background: #000; border: 2px solid #00ff00; color: #00ff00 !important; font-family: 'Courier New', monospace; }
-        .theme-cyber .c-couple { -webkit-text-fill-color: #00ff00; background: none; text-shadow: 0 0 10px #00ff00; }
-        .theme-bollywood { background: radial-gradient(circle, #ffeb3b, #f57f17); color: #b71c1c !important; border: 4px dotted #b71c1c; }
-        .theme-bollywood .c-couple { -webkit-text-fill-color: #b71c1c; background: none; font-weight: 800; }
+        .theme-beach { background: linear-gradient(180deg, #81d4fa 0%, #e1f5fe 100%); color: #01579b !important; } .theme-beach .c-couple { -webkit-text-fill-color: #01579b; background: none; }
+        .theme-retro { background: #f4e1d2; color: #bf360c !important; font-family: 'Courier New', monospace; border: 2px dashed #bf360c; } .theme-retro .c-couple { font-family: 'Courier New', monospace; -webkit-text-fill-color: #bf360c; background: none; letter-spacing: -2px; }
+        .theme-cyber { background: #000; border: 2px solid #00ff00; color: #00ff00 !important; font-family: 'Courier New', monospace; } .theme-cyber .c-couple { -webkit-text-fill-color: #00ff00; background: none; text-shadow: 0 0 10px #00ff00; }
+        .theme-bollywood { background: radial-gradient(circle, #ffeb3b, #f57f17); color: #b71c1c !important; border: 4px dotted #b71c1c; } .theme-bollywood .c-couple { -webkit-text-fill-color: #b71c1c; background: none; font-weight: 800; }
         
         .foil-overlay { position: absolute; inset: 0; mix-blend-mode: overlay; opacity: 0.3; background: url('https://www.transparenttextures.com/patterns/stardust.png'); pointer-events: none; z-index: 3; }
         .glare { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.0) 50%); pointer-events: none; z-index: 5; }
@@ -203,16 +192,31 @@
         <video id="pageBgVideoEl" loop muted playsinline autoplay></video>
     </div>
 
+    <audio id="bgMusic" loop>
+        <source src="https://actions.google.com/sounds/v1/ambiences/wind_chimes.ogg" type="audio/ogg">
+    </audio>
+
     <div class="input-panel">
         <div class="brand">LuxeInvite<span style="font-size:12px; vertical-align:top;">®</span></div>
         <div class="subtitle">2026 Wedding Collection</div>
 
-        <button class="btn btn-audio" id="audioBtn" onclick="toggleAudio()">
-            <i class="fas fa-music"></i> <span id="audioText">Add Ambient Music</span>
+        <div class="section-title">Music & Audio</div>
+        <div style="margin-bottom:10px;">
+            <label style="font-size:10px; color:#aaa;">Upload Song (MP3/WAV)</label>
+            <input type="file" id="musicInput" accept="audio/*" onchange="handleMusicUpload()" style="margin-top:5px;">
+        </div>
+        
+        <div id="trimmerBox" class="trimmer-box">
+            <div class="audio-wave"></div>
+            <div class="range-label"><span>Start Time</span><span id="startVal">0s</span></div>
+            <input type="range" id="startRange" min="0" value="0" step="1" oninput="updateMusicSettings()">
+            <div class="range-label"><span>Loop Duration</span><span id="durVal">30s</span></div>
+            <input type="range" id="durRange" min="5" max="60" value="30" step="1" oninput="updateMusicSettings()">
+            <button onclick="previewAudio()" class="btn" style="background:#444; margin-top:5px; font-size:10px;"><i class="fas fa-play"></i> Preview Loop</button>
+        </div>
+        <button id="defaultAudioBtn" class="btn" onclick="toggleAudio()" style="margin-top:5px; background: #333; border: 1px solid #555;">
+            <i class="fas fa-music"></i> <span id="audioText">Use Default Chimes</span>
         </button>
-        <audio id="bgMusic" loop>
-            <source src="https://actions.google.com/sounds/v1/ambiences/wind_chimes.ogg" type="audio/ogg">
-        </audio>
         <br><br>
 
         <div class="section-title">1. The Couple</div>
@@ -293,7 +297,7 @@
         </div>
         <button onclick="clearCustomBg()" class="btn" style="background:#444; font-size:10px;">Clear Media</button>
 
-        <div class="section-title">6. Page Background (Atmosphere)</div>
+        <div class="section-title">6. Page Background (Image OR Video)</div>
         <div class="row">
             <select id="pageThemeSel" onchange="updatePageTheme()" style="width:100%; margin-bottom:5px;">
                 <option value="default">Default Dark Room</option>
@@ -311,7 +315,6 @@
                 <option value="obsidian">Obsidian Matte</option>
             </select>
         </div>
-        <div style="font-size:10px; color:#aaa; margin-bottom:5px; text-align:center;">- OR Upload Custom -</div>
         <div class="row"><input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()"><input type="file" id="pageVidInput" accept="video/*" onchange="handlePageVideoUpload()"></div>
         <div id="pagePhotoControls" style="display:none;">
             <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div><input type="range" id="pageZoomRange" min="50" max="250" value="100" oninput="updatePagePhotoSettings()">
@@ -341,7 +344,7 @@
                             <div class="c-content">
                                 <div class="c-top"><div class="c-logo" id="outTag">#RaNjali</div></div>
                                 <div class="c-main">
-                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">Mr. & Mrs. Sharma</span></span></div>
+                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">${guestName}</span></span></div>
                                     <div class="c-couple" id="outName">Rahul & Anjali</div>
                                 </div>
                                 <div class="c-details">
@@ -378,6 +381,12 @@
         let customPageBgData = null; let customPageVideoData = null;
         let bgPos = { x: 50, y: 50 }; let pageBgPos = { x: 50, y: 50 };
         let isDraggingCard = false; let isDraggingPage = false; let startPos = { x:0, y:0 };
+        
+        // Music Vars
+        let musicData = null;
+        let musicStart = 0;
+        let musicDuration = 30;
+        const bgMusic = document.getElementById('bgMusic');
 
         // 3D Theme Definitions
         const pageThemes = {
@@ -421,6 +430,43 @@
 
         function handleCardClick() { if(!isDraggingCard) toggleFlip(); }
 
+        // --- Audio Logic ---
+        function handleMusicUpload() {
+            const file = document.getElementById('musicInput').files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                musicData = e.target.result;
+                bgMusic.src = musicData;
+                document.getElementById('trimmerBox').style.display = 'block';
+                document.getElementById('defaultAudioBtn').style.display = 'none';
+                bgMusic.onloadedmetadata = function() {
+                    const dur = Math.floor(bgMusic.duration);
+                    document.getElementById('startRange').max = dur;
+                    document.getElementById('durRange').max = Math.min(dur, 60);
+                    updateMusicSettings();
+                };
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function updateMusicSettings() {
+            musicStart = parseInt(document.getElementById('startRange').value);
+            musicDuration = parseInt(document.getElementById('durRange').value);
+            document.getElementById('startVal').innerText = new Date(musicStart * 1000).toISOString().substr(14, 5);
+            document.getElementById('durVal').innerText = musicDuration + "s";
+        }
+
+        function previewAudio() {
+            bgMusic.currentTime = musicStart; bgMusic.play();
+            const stopTime = musicStart + musicDuration;
+            const checkTime = setInterval(() => {
+                if(bgMusic.currentTime >= stopTime || bgMusic.paused) { bgMusic.pause(); bgMusic.currentTime = musicStart; clearInterval(checkTime); }
+            }, 100);
+        }
+
+        function toggleAudio() { if(bgMusic.paused) bgMusic.play(); else bgMusic.pause(); }
+
         // --- Upload Handlers ---
         function handleBgUpload() { readMedia('bgInput', (res) => { customBgData = res; customVideoData = null; document.getElementById('photoControls').style.display = 'block'; bgPos = {x:50,y:50}; updateCard(); }); }
         function handleVideoUpload() { readMedia('vidInput', (res) => { customVideoData = res; customBgData = null; document.getElementById('photoControls').style.display = 'block'; bgPos = {x:50,y:50}; updateCard(); }); }
@@ -439,25 +485,19 @@
             const zoom = document.getElementById('pageZoomRange').value;
             const themeKey = document.getElementById('pageThemeSel').value;
             
-            // 1. Video Upload
             if(customPageVideoData) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = customPageVideoData; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            } 
-            // 2. Image Upload
-            else if(customPageBgData) {
+            } else if(customPageBgData) {
                 vidEl.style.display = 'none'; vidEl.pause();
                 layer.style.background = `url(${customPageBgData}) no-repeat`;
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 layer.style.backgroundSize = zoom == 100 ? 'cover' : zoom + "%";
-            } 
-            // 3. Preset Theme
-            else if(pageThemes[themeKey]) {
+            } else if(pageThemes[themeKey]) {
                 vidEl.style.display = 'none';
                 layer.style = pageThemes[themeKey];
-                // Apply drag/zoom if needed, but presets usually fixed. Drag moves position.
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 if(zoom != 100) layer.style.backgroundSize = zoom + "%";
             }
@@ -486,7 +526,6 @@
                 else el.innerText = val;
             });
 
-            // Timings
             document.getElementById('oEv1Time').innerText = document.getElementById('ev1Time').value;
             document.getElementById('oEv1Name').innerText = document.getElementById('ev1Name').value;
             document.getElementById('oEv2Time').innerText = document.getElementById('ev2Time').value;
@@ -494,7 +533,6 @@
             document.getElementById('oEv3Time').innerText = document.getElementById('ev3Time').value;
             document.getElementById('oEv3Name').innerText = document.getElementById('ev3Name').value;
 
-            // Visibility
             document.getElementById('guestRow').style.display = document.getElementById('checkGuest').checked ? 'flex' : 'none';
             document.getElementById('qrBox').style.display = document.getElementById('checkQR').checked ? 'block' : 'none';
             
@@ -503,13 +541,11 @@
             document.getElementById('btnFlipDock').style.display = showBack ? 'block' : 'none';
             if(!showBack && isFlipped) toggleFlip(); 
 
-            // Loop
             const isLoop = document.getElementById('checkLoop').checked;
             const floater = document.getElementById('card-floater');
             if(isLoop) { floater.classList.add('anim-active'); document.getElementById('hintText').innerText = "✋ Hover to Pause"; } 
             else { floater.classList.remove('anim-active'); document.getElementById('hintText').innerText = showBack ? "👆 Tap to Flip" : "✨ Invitation"; }
 
-            // Date
             const d = new Date(document.getElementById('inDate').value);
             const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
             const t = document.getElementById('inTime').value;
@@ -517,7 +553,6 @@
             if(t) { const [h, m] = t.split(":"); const ampm = h>=12 ? 'PM' : 'AM'; timeStr = `<br>${h%12||12}:${m} ${ampm}`; }
             document.getElementById('outDate').innerHTML = dateStr + timeStr;
 
-            // Card BG
             const face = document.getElementById('faceFront'); const vid = document.getElementById('bgVideo');
             const card = document.getElementById('card'); card.className = 'card-wrapper ' + document.getElementById('themeSel').value;
             if(isFlipped) card.classList.add('is-flipped');
@@ -538,7 +573,6 @@
             const dragLayer = document.getElementById('drag-layer');
             const card = document.getElementById('card');
 
-            // Card Drag
             const startCardDrag = (e) => {
                 if(!customBgData && !customVideoData) return;
                 isDraggingCard = true; 
@@ -548,9 +582,7 @@
             face.addEventListener('mousedown', startCardDrag);
             face.addEventListener('touchstart', startCardDrag);
             
-            // Page Drag
             const startPageDrag = (e) => {
-                // Allow drag on presets too now
                 isDraggingPage = true; 
                 startPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
                 dragLayer.style.cursor = 'grabbing';
@@ -583,7 +615,6 @@
                     updatePageTheme(); startPos = { x: clientX, y: clientY };
                 }
                 else if(!document.getElementById('checkLoop').checked && !isDraggingCard && !isDraggingPage) {
-                    // Manual Tilt
                     if(e.type === 'mousemove') {
                         const rect = card.getBoundingClientRect();
                         const x = clientX - rect.left; const y = clientY - rect.top;
@@ -604,12 +635,11 @@
         }
         
         function setScale() { 
-            const w = window.innerWidth; 
-            const h = window.innerHeight;
-            const scaler = document.getElementById('card-scaler'); 
-            let scale = 1;
-            if(w < 550) { scale = (w - 40) / 525; }
-            // Improved Mobile Logic: Do not shrink too much, just fit
+            const w = window.innerWidth; const h = window.innerHeight; const scaler = document.getElementById('card-scaler'); 
+            let scale = 1; if(w < 550) scale = (w - 40) / 525;
+            // Relaxed height logic for better mobile view
+            const reqH = 450; 
+            // if (h < reqH) { const hScale = (h - 140) / 300; if (hScale < scale) scale = hScale; }
             if(scale < 1) scaler.style.transform = `scale(${scale})`; else scaler.style.transform = 'scale(1)';
         } 
         window.addEventListener('resize', setScale);
@@ -664,7 +694,6 @@
             const ev3T = document.getElementById('oEv3Time').innerText; const ev3N = document.getElementById('oEv3Name').innerText;
             const link = document.getElementById('inLink').value || "http://google.com";
             
-            // Calendar Vars
             const calTitle = document.getElementById('inName').value + " Wedding";
             const calVenue = document.getElementById('inVenue').value;
             const calDateVal = document.getElementById('inDate').value.replaceAll('-', '');
@@ -688,14 +717,33 @@
             } else if(customPageBgData) {
                 const zoom = document.getElementById('pageZoomRange').value;
                 let sizeVal = zoom == 100 ? 'cover' : zoom + "%";
-                pageBgStyle = `#fixed-layer { background: url('${customPageBgData}') no-repeat; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; background-size: ${sizeVal}; }`;
+                pageBgStyle = `#fixed-layer { background: url('${customPageBgData}') no-repeat center center; background-size: ${sizeVal}; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; }`;
             } else if(pageThemes[themeKey]) {
-                // Embed Preset Theme
                 pageBgStyle = `#fixed-layer { ${pageThemes[themeKey]} background-position: ${pageBgPos.x}% ${pageBgPos.y}%; }`;
+            }
+
+            let audioHTML = ''; let audioScript = '';
+            if(musicData) {
+                audioHTML = `<audio id="bgMusic" style="display:none;"><source src="${musicData}" type="audio/mp3"></audio>
+                <button id="playBtn" style="position:fixed; top:20px; right:20px; z-index:100; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.3); color:white; border-radius:50%; width:40px; height:40px; cursor:pointer;" onclick="toggleAudio()"><i class="fas fa-music"></i></button>`;
+                audioScript = `
+                var audio = document.getElementById('bgMusic');
+                var start = ${musicStart}; var dur = ${musicDuration};
+                function toggleAudio() {
+                    if(audio.paused) { audio.currentTime = start; audio.play(); trackLoop(); } else { audio.pause(); }
+                }
+                function trackLoop() {
+                    var check = setInterval(function() {
+                        if(audio.currentTime >= start + dur) { audio.currentTime = start; }
+                        if(audio.paused) clearInterval(check);
+                    }, 100);
+                }
+                `;
             }
 
             return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss} ${pageBgStyle}</style></head><body>
             ${pageVideoHTML || '<div id="fixed-layer"></div>'}
+            ${audioHTML}
             <div class="preview-panel">
                 <div class="tap-hint" style="opacity:1;top:10%;color:white;animation:bounce 2s infinite">${isLoop ? '✋ Hover to Pause' : (showBack ? '👆 Tap to Flip' : '✨ Invitation')}</div>
                 <div class="card-scene">
@@ -727,6 +775,7 @@
                 </div>
             </div>
             <script>
+                ${audioScript}
                 new QRCode(document.getElementById("qrcode"), { text: "${link}", width: 70, height: 70, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
                 function addToCalendar() {
                     const icsContent = \`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${calTitle}\nLOCATION:${calVenue}\nDTSTART;VALUE=DATE:${calDateVal}\nEND:VEVENT\nEND:VCALENDAR\`;
