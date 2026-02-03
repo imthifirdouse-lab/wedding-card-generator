@@ -26,8 +26,8 @@
         /* --- FIXED BACKGROUND LAYER (Mobile Fix) --- */
         #fixed-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
-            background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
-            background-size: cover; background-position: center; background-repeat: no-repeat;
+            background-color: #111;
+            background-position: center; background-repeat: no-repeat;
             transition: background-position 0.05s linear; /* Fast response for drag */
         }
         #pageBgVideoEl {
@@ -293,7 +293,25 @@
         </div>
         <button onclick="clearCustomBg()" class="btn" style="background:#444; font-size:10px;">Clear Media</button>
 
-        <div class="section-title">6. Page Background (Image OR Video)</div>
+        <div class="section-title">6. Page Background (Atmosphere)</div>
+        <div class="row">
+            <select id="pageThemeSel" onchange="updatePageTheme()" style="width:100%; margin-bottom:5px;">
+                <option value="default">Default Dark Room</option>
+                <option value="carbon">Carbon Fiber (3D)</option>
+                <option value="gold-dust">Golden Dust</option>
+                <option value="deep-space">Deep Space</option>
+                <option value="royal-silk">Royal Silk</option>
+                <option value="cyber-grid">Cyber Grid</option>
+                <option value="emerald-city">Emerald City</option>
+                <option value="midnight-blue">Midnight Blue</option>
+                <option value="crimson-tide">Crimson Tide</option>
+                <option value="marble-hall">Marble Hall</option>
+                <option value="arctic-ice">Arctic Ice</option>
+                <option value="amethyst">Amethyst Void</option>
+                <option value="obsidian">Obsidian Matte</option>
+            </select>
+        </div>
+        <div style="font-size:10px; color:#aaa; margin-bottom:5px; text-align:center;">- OR Upload Custom -</div>
         <div class="row"><input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()"><input type="file" id="pageVidInput" accept="video/*" onchange="handlePageVideoUpload()"></div>
         <div id="pagePhotoControls" style="display:none;">
             <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div><input type="range" id="pageZoomRange" min="50" max="250" value="100" oninput="updatePagePhotoSettings()">
@@ -361,6 +379,23 @@
         let bgPos = { x: 50, y: 50 }; let pageBgPos = { x: 50, y: 50 };
         let isDraggingCard = false; let isDraggingPage = false; let startPos = { x:0, y:0 };
 
+        // 3D Theme Definitions
+        const pageThemes = {
+            'default': "background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000); background-size: auto, cover;",
+            'carbon': "background: radial-gradient(black 15%, transparent 16%) 0 0, radial-gradient(black 15%, transparent 16%) 8px 8px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px, radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px; background-color:#282828; background-size:16px 16px;",
+            'gold-dust': "background: radial-gradient(circle, #BF953F, #462523);",
+            'deep-space': "background: radial-gradient(circle at center, #16222A, #3A6073);",
+            'royal-silk': "background: radial-gradient(circle at 50% 50%, #403060, #0F0918);",
+            'cyber-grid': "background: linear-gradient(transparent 95%, #00ffcc 95%), linear-gradient(90deg, transparent 95%, #00ffcc 95%); background-size: 40px 40px; background-color: #050505;",
+            'emerald-city': "background: radial-gradient(circle, #134E5E, #000000);",
+            'midnight-blue': "background: linear-gradient(to bottom, #000428, #004e92);",
+            'crimson-tide': "background: linear-gradient(to right, #41295a, #2F0743);",
+            'marble-hall': "background: url('https://www.transparenttextures.com/patterns/white-diamond-dark.png'), linear-gradient(to bottom, #e0e0e0, #ffffff);",
+            'arctic-ice': "background: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);",
+            'amethyst': "background: radial-gradient(circle at top right, #360033, #0b8793);",
+            'obsidian': "background: linear-gradient(135deg, #2b2b2b 0%, #000000 100%);"
+        };
+
         function init() {
             qr = new QRCode(document.getElementById("qrcode"), { text: "https://example.com", width: 70, height: 70, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
             const today = new Date(); document.getElementById('inDate').valueAsDate = today; document.getElementById('inTime').value = "16:30"; 
@@ -402,21 +437,29 @@
             const layer = document.getElementById('fixed-layer');
             const vidEl = document.getElementById('pageBgVideoEl');
             const zoom = document.getElementById('pageZoomRange').value;
+            const themeKey = document.getElementById('pageThemeSel').value;
             
+            // 1. Video Upload
             if(customPageVideoData) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = customPageVideoData; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            } else if(customPageBgData) {
+            } 
+            // 2. Image Upload
+            else if(customPageBgData) {
                 vidEl.style.display = 'none'; vidEl.pause();
                 layer.style.background = `url(${customPageBgData}) no-repeat`;
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 layer.style.backgroundSize = zoom == 100 ? 'cover' : zoom + "%";
-            } else {
+            } 
+            // 3. Preset Theme
+            else if(pageThemes[themeKey]) {
                 vidEl.style.display = 'none';
-                layer.style.background = `url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000)`;
-                layer.style.backgroundSize = 'auto, cover';
+                layer.style = pageThemes[themeKey];
+                // Apply drag/zoom if needed, but presets usually fixed. Drag moves position.
+                layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
+                if(zoom != 100) layer.style.backgroundSize = zoom + "%";
             }
         }
 
@@ -507,7 +550,7 @@
             
             // Page Drag
             const startPageDrag = (e) => {
-                if(!customPageBgData && !customPageVideoData) return;
+                // Allow drag on presets too now
                 isDraggingPage = true; 
                 startPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
                 dragLayer.style.cursor = 'grabbing';
@@ -561,12 +604,12 @@
         }
         
         function setScale() { 
-            const w = window.innerWidth; const h = window.innerHeight; const scaler = document.getElementById('card-scaler'); 
-            let scale = 1; if(w < 550) scale = (w - 40) / 525;
-            // Relaxed height logic: only shrink if extremely short
-            const reqH = 450; 
-            // if (h < reqH) { const hScale = (h - 140) / 300; if (hScale < scale) scale = hScale; } 
-            
+            const w = window.innerWidth; 
+            const h = window.innerHeight;
+            const scaler = document.getElementById('card-scaler'); 
+            let scale = 1;
+            if(w < 550) { scale = (w - 40) / 525; }
+            // Improved Mobile Logic: Do not shrink too much, just fit
             if(scale < 1) scaler.style.transform = `scale(${scale})`; else scaler.style.transform = 'scale(1)';
         } 
         window.addEventListener('resize', setScale);
@@ -614,6 +657,7 @@
             const showBack = document.getElementById('checkBack').checked;
             const checkGuest = document.getElementById('checkGuest').checked;
             const checkQR = document.getElementById('checkQR').checked;
+            const themeKey = document.getElementById('pageThemeSel').value;
             
             const ev1T = document.getElementById('oEv1Time').innerText; const ev1N = document.getElementById('oEv1Name').innerText;
             const ev2T = document.getElementById('oEv2Time').innerText; const ev2N = document.getElementById('oEv2Name').innerText;
@@ -644,7 +688,10 @@
             } else if(customPageBgData) {
                 const zoom = document.getElementById('pageZoomRange').value;
                 let sizeVal = zoom == 100 ? 'cover' : zoom + "%";
-                pageBgStyle = `#fixed-layer { background: url('${customPageBgData}') no-repeat center center; background-size: ${sizeVal}; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; }`;
+                pageBgStyle = `#fixed-layer { background: url('${customPageBgData}') no-repeat; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; background-size: ${sizeVal}; }`;
+            } else if(pageThemes[themeKey]) {
+                // Embed Preset Theme
+                pageBgStyle = `#fixed-layer { ${pageThemes[themeKey]} background-position: ${pageBgPos.x}% ${pageBgPos.y}%; }`;
             }
 
             return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss} ${pageBgStyle}</style></head><body>
@@ -693,9 +740,7 @@
                     const scaler = document.getElementById('card-scaler'); 
                     let scale = 1;
                     if(w < 550) { scale = (w - 40) / 525; }
-                    const requiredHeight = 400; 
-                    if (h < requiredHeight) { const hScale = (h - 140) / 300; if (hScale < scale) scale = hScale; }
-                    if(w < 550 || h < requiredHeight) { scaler.style.transform = 'scale('+scale+')'; } else { scaler.style.transform = 'scale(1)'; } 
+                    if(scale < 1) scaler.style.transform = 'scale('+scale+')'; else scaler.style.transform = 'scale(1)'; 
                 } 
                 window.addEventListener('resize', setScale); setScale();
             <\/script></body></html>`;
