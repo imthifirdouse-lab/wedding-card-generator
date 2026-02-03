@@ -23,7 +23,7 @@
         * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); display: flex; height: 100vh; margin: 0; color: var(--text); overflow: hidden; }
 
-        /* --- FIXED BACKGROUND LAYER --- */
+        /* --- FIXED BACKGROUND LAYER (Mobile Fix) --- */
         #fixed-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
@@ -297,7 +297,7 @@
         </div>
         <button onclick="clearCustomBg()" class="btn" style="background:#444; font-size:10px;">Clear Media</button>
 
-        <div class="section-title">6. Page Background (Image OR Video)</div>
+        <div class="section-title">6. Page Background (Atmosphere)</div>
         <div class="row">
             <select id="pageThemeSel" onchange="updatePageTheme()" style="width:100%; margin-bottom:5px;">
                 <option value="default">Default Dark Room</option>
@@ -315,6 +315,17 @@
                 <option value="obsidian">Obsidian Matte</option>
             </select>
         </div>
+        <div class="section-title" style="font-size:10px; color:#aaa; border:none; margin-top:5px; text-align:center;">--- OR LIVE VIDEO EFFECTS (REQUIRE INTERNET) ---</div>
+        <div class="row">
+            <select id="videoPresetSel" onchange="updatePageTheme()" style="width:100%; margin-bottom:5px; border-color:#8e44ad; color:#d4af37;">
+                <option value="">-- No Live Effect --</option>
+                <option value="https://cdn.pixabay.com/video/2019/04/20/22908-331580976_tiny.mp4">Golden Bokeh</option>
+                <option value="https://cdn.pixabay.com/video/2020/09/20/49969-462973977_tiny.mp4">Ethereal Clouds</option>
+                <option value="https://cdn.pixabay.com/video/2020/04/18/36423-408933221_tiny.mp4">Cosmic Stars</option>
+                <option value="https://cdn.pixabay.com/video/2023/07/26/173322-849033237_tiny.mp4">Love Hearts</option>
+            </select>
+        </div>
+        <div style="font-size:10px; color:#aaa; margin-bottom:5px; text-align:center;">- OR Upload Custom -</div>
         <div class="row"><input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()"><input type="file" id="pageVidInput" accept="video/*" onchange="handlePageVideoUpload()"></div>
         <div id="pagePhotoControls" style="display:none;">
             <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div><input type="range" id="pageZoomRange" min="50" max="250" value="100" oninput="updatePagePhotoSettings()">
@@ -344,7 +355,7 @@
                             <div class="c-content">
                                 <div class="c-top"><div class="c-logo" id="outTag">#RaNjali</div></div>
                                 <div class="c-main">
-                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">${guestName}</span></span></div>
+                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">Mr. & Mrs. Sharma</span></span></div>
                                     <div class="c-couple" id="outName">Rahul & Anjali</div>
                                 </div>
                                 <div class="c-details">
@@ -484,18 +495,31 @@
             const vidEl = document.getElementById('pageBgVideoEl');
             const zoom = document.getElementById('pageZoomRange').value;
             const themeKey = document.getElementById('pageThemeSel').value;
+            const vidPreset = document.getElementById('videoPresetSel').value;
             
+            // 1. Uploaded Video
             if(customPageVideoData) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = customPageVideoData; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            } else if(customPageBgData) {
+            } 
+            // 2. Uploaded Image
+            else if(customPageBgData) {
                 vidEl.style.display = 'none'; vidEl.pause();
                 layer.style.background = `url(${customPageBgData}) no-repeat`;
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 layer.style.backgroundSize = zoom == 100 ? 'cover' : zoom + "%";
-            } else if(pageThemes[themeKey]) {
+            }
+            // 3. Live Video Preset
+            else if(vidPreset) {
+                layer.style.background = 'black';
+                vidEl.style.display = 'block'; vidEl.src = vidPreset; vidEl.play();
+                vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
+                vidEl.style.transform = `scale(${zoom/100})`;
+            }
+            // 4. CSS Preset
+            else if(pageThemes[themeKey]) {
                 vidEl.style.display = 'none';
                 layer.style = pageThemes[themeKey];
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
@@ -514,7 +538,12 @@
             document.getElementById('pageZoomVal').innerText = document.getElementById('pageZoomRange').value + "%"; updatePageTheme();
         }
         function clearCustomBg() { customBgData=null; customVideoData=null; document.getElementById('bgInput').value=""; document.getElementById('vidInput').value=""; document.getElementById('photoControls').style.display='none'; updateCard(); }
-        function clearPageBg() { customPageBgData=null; customPageVideoData=null; document.getElementById('pageBgInput').value=""; document.getElementById('pageVidInput').value=""; document.getElementById('pagePhotoControls').style.display='none'; updatePageTheme(); }
+        function clearPageBg() { 
+            customPageBgData=null; customPageVideoData=null; 
+            document.getElementById('pageBgInput').value=""; document.getElementById('pageVidInput').value=""; 
+            document.getElementById('videoPresetSel').value=""; 
+            document.getElementById('pagePhotoControls').style.display='none'; updatePageTheme(); 
+        }
 
         function updateCard() {
             const ids = ['inName','inTag','inGuest','inVenue','inLink'];
@@ -636,11 +665,9 @@
         
         function setScale() { 
             const w = window.innerWidth; const h = window.innerHeight; const scaler = document.getElementById('card-scaler'); 
-            let scale = 1; if(w < 550) scale = (w - 40) / 525;
-            // Relaxed height logic for better mobile view
-            const reqH = 450; 
-            // if (h < reqH) { const hScale = (h - 140) / 300; if (hScale < scale) scale = hScale; }
-            if(scale < 1) scaler.style.transform = `scale(${scale})`; else scaler.style.transform = 'scale(1)';
+            let scale = 1;
+            if(w < 550) { scale = (w - 40) / 525; }
+            if(scale < 1) scaler.style.transform = `scale(${scale})`; else scaler.style.transform = 'scale(1)'; 
         } 
         window.addEventListener('resize', setScale);
 
@@ -688,6 +715,7 @@
             const checkGuest = document.getElementById('checkGuest').checked;
             const checkQR = document.getElementById('checkQR').checked;
             const themeKey = document.getElementById('pageThemeSel').value;
+            const vidPreset = document.getElementById('videoPresetSel').value;
             
             const ev1T = document.getElementById('oEv1Time').innerText; const ev1N = document.getElementById('oEv1Name').innerText;
             const ev2T = document.getElementById('oEv2Time').innerText; const ev2N = document.getElementById('oEv2Name').innerText;
@@ -711,13 +739,15 @@
             if(isLoop) wrapperClass += ' auto-loop';
             
             let pageVideoHTML = ''; let pageBgStyle = '';
+            const zoom = document.getElementById('pageZoomRange').value;
+            
             if(customPageVideoData) {
-                const zoom = document.getElementById('pageZoomRange').value;
                 pageVideoHTML = `<div id="fixed-layer"><video id="pageBgVideoEl" loop muted playsinline autoplay src="${customPageVideoData}" style="display:block; object-position: ${pageBgPos.x}% ${pageBgPos.y}%; transform: scale(${zoom/100});"></video></div>`;
             } else if(customPageBgData) {
-                const zoom = document.getElementById('pageZoomRange').value;
                 let sizeVal = zoom == 100 ? 'cover' : zoom + "%";
-                pageBgStyle = `#fixed-layer { background: url('${customPageBgData}') no-repeat center center; background-size: ${sizeVal}; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; }`;
+                pageBgStyle = `#fixed-layer { background: url('${customPageBgData}') no-repeat; background-position: ${pageBgPos.x}% ${pageBgPos.y}%; background-size: ${sizeVal}; }`;
+            } else if(vidPreset) {
+                pageVideoHTML = `<div id="fixed-layer"><video id="pageBgVideoEl" loop muted playsinline autoplay src="${vidPreset}" style="display:block; object-position: ${pageBgPos.x}% ${pageBgPos.y}%; transform: scale(${zoom/100});"></video></div>`;
             } else if(pageThemes[themeKey]) {
                 pageBgStyle = `#fixed-layer { ${pageThemes[themeKey]} background-position: ${pageBgPos.x}% ${pageBgPos.y}%; }`;
             }
