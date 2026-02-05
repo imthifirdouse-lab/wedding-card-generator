@@ -23,12 +23,13 @@
         * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); display: flex; height: 100vh; margin: 0; color: var(--text); overflow: hidden; }
 
-        /* --- FIXED BACKGROUND LAYER --- */
+        /* --- FIXED BACKGROUND LAYER (Mobile 100dvh Fix) --- */
         #fixed-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; /* Mobile Fit Fix */
+            z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
             background-size: cover; background-position: center; background-repeat: no-repeat;
-            transition: background-position 0.05s linear; /* Fast response */
+            transition: background-position 0.05s linear;
         }
         #pageBgVideoEl {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -357,7 +358,7 @@
                             <div class="c-content">
                                 <div class="c-top"><div class="c-logo" id="outTag">#RaNjali</div></div>
                                 <div class="c-main">
-                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">${guestName}</span></span></div>
+                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">Mr. & Mrs. Sharma</span></span></div>
                                     <div class="c-couple" id="outName">Rahul & Anjali</div>
                                 </div>
                                 <div class="c-details">
