@@ -28,7 +28,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
             background-size: cover; background-position: center; background-repeat: no-repeat;
-            transition: background-position 0.05s linear;
+            transition: background-position 0.05s linear; /* Fast response */
         }
         #pageBgVideoEl {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -119,7 +119,7 @@
         .c-val { font-size: 11px; font-weight: 700; font-family: 'Playfair Display', serif; }
         .c-qr-box { position: absolute; bottom: 25px; right: 25px; background: white; padding: 4px; border-radius: 6px; }
 
-        /* THEMES (ALL INCLUDED) */
+        /* THEMES (ALL 23) */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; } .theme-ivory .c-gold-text { color: #8b6b3e !important; } .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
@@ -523,8 +523,8 @@
             // 4. CSS Preset
             else if(pageThemes[themeKey]) {
                 vidEl.style.display = 'none';
-                layer.style = pageThemes[themeKey];
-                layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
+                layer.style.cssText = pageThemes[themeKey]; // Key fix: set cssText first
+                layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`; // Then apply pos
                 if(zoom != 100) layer.style.backgroundSize = zoom + "%";
             }
         }
