@@ -23,10 +23,9 @@
         * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); display: flex; height: 100vh; margin: 0; color: var(--text); overflow: hidden; }
 
-        /* --- FIXED BACKGROUND LAYER (Mobile 100dvh Fix) --- */
+        /* --- FIXED BACKGROUND LAYER --- */
         #fixed-layer {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; /* Mobile Fit Fix */
-            z-index: 0; pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
             background-size: cover; background-position: center; background-repeat: no-repeat;
             transition: background-position 0.05s linear;
@@ -69,15 +68,22 @@
 
         /* --- CARD SCENE --- */
         .card-scene { width: 525px; height: 300px; position: relative; z-index: 5; pointer-events: none; }
-        #card-scaler { width: 100%; height: 100%; transform-origin: center center; }
+        #card-scaler { width: 100%; height: 100%; transform-origin: center center; display: flex; justify-content: center; align-items: center; }
         #card-floater { width: 100%; height: 100%; transform-style: preserve-3d; }
         
+        /* STANDARD (LANDSCAPE) */
         .card-wrapper { 
-            width: 100%; height: 100%; position: relative; pointer-events: auto; 
-            transform-style: preserve-3d; transition: transform 0.1s linear; 
+            width: 525px; height: 300px; position: relative; pointer-events: auto; 
+            transform-style: preserve-3d; transition: transform 0.1s linear, width 0.3s, height 0.3s; 
             background-color: #333; background-size: cover; background-position: center;
-            border-radius: 16px; cursor: grab;
+            border-radius: 16px; cursor: grab; margin: auto;
         }
+
+        /* STORY (PORTRAIT) MODE */
+        .card-wrapper.format-story {
+            width: 320px; height: 570px;
+        }
+        
         .card-wrapper.is-dragging { cursor: grabbing; }
         .card-wrapper.flipping { transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card-wrapper.is-flipped { transform: rotateY(180deg); }
@@ -120,7 +126,17 @@
         .c-val { font-size: 11px; font-weight: 700; font-family: 'Playfair Display', serif; }
         .c-qr-box { position: absolute; bottom: 25px; right: 25px; background: white; padding: 4px; border-radius: 6px; }
 
-        /* THEMES (ALL 23) */
+        /* STORY LAYOUT OVERRIDES */
+        .format-story .c-content { text-align: center; }
+        .format-story .c-top { justify-content: center; }
+        .format-story .c-main { text-align: center; margin-top: auto; margin-bottom: auto; }
+        .format-story .c-guest { justify-content: center; }
+        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 80px; } /* Room for QR */
+        .format-story .c-qr-box { position: absolute; bottom: 30px; left: 50%; right: auto; transform: translateX(-50%); }
+        .format-story .face-back { text-align: center; }
+        .format-story .b-item { justify-content: center; }
+
+        /* THEMES */
         .theme-royal { background: #0f172a; border: 2px solid #d4af37; color: white; }
         .theme-maroon { background: linear-gradient(135deg, #4a0000 0%, #2a0000 100%); border: none; color: white; }
         .theme-ivory { background: #fdfaf6; color: #333 !important; border: 1px solid #e6dace; } .theme-ivory .c-gold-text { color: #8b6b3e !important; } .theme-ivory .c-guest, .theme-ivory .c-details { color: #555 !important; border-top-color: rgba(0,0,0,0.1) !important; }
@@ -200,6 +216,12 @@
     <div class="input-panel">
         <div class="brand">LuxeInvite<span style="font-size:12px; vertical-align:top;">®</span></div>
         <div class="subtitle">2026 Wedding Collection</div>
+
+        <div class="section-title">0. Card Format</div>
+        <select id="formatSel" onchange="updateCard()" style="margin-bottom:15px; border-color:#d4af37; color:#d4af37;">
+            <option value="std">Standard (Landscape)</option>
+            <option value="story">Insta Story (Portrait)</option>
+        </select>
 
         <div class="section-title">Music & Audio</div>
         <div style="margin-bottom:10px;">
@@ -358,7 +380,7 @@
                             <div class="c-content">
                                 <div class="c-top"><div class="c-logo" id="outTag">#RaNjali</div></div>
                                 <div class="c-main">
-                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">Mr. & Mrs. Sharma</span></span></div>
+                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">${guestName}</span></span></div>
                                     <div class="c-couple" id="outName">Rahul & Anjali</div>
                                 </div>
                                 <div class="c-details">
@@ -567,6 +589,12 @@
                 else el.innerText = val;
             });
 
+            // Handle Layout Switching
+            const format = document.getElementById('formatSel').value;
+            const card = document.getElementById('card');
+            if(format === 'story') card.classList.add('format-story');
+            else card.classList.remove('format-story');
+
             document.getElementById('oEv1Time').innerText = document.getElementById('ev1Time').value;
             document.getElementById('oEv1Name').innerText = document.getElementById('ev1Name').value;
             document.getElementById('oEv2Time').innerText = document.getElementById('ev2Time').value;
@@ -595,7 +623,11 @@
             document.getElementById('outDate').innerHTML = dateStr + timeStr;
 
             const face = document.getElementById('faceFront'); const vid = document.getElementById('bgVideo');
-            const card = document.getElementById('card'); card.className = 'card-wrapper ' + document.getElementById('themeSel').value;
+            
+            // Preserve format class while changing theme
+            const currentFormat = card.classList.contains('format-story') ? 'format-story' : '';
+            card.className = 'card-wrapper ' + document.getElementById('themeSel').value + ' ' + currentFormat;
+            
             if(isFlipped) card.classList.add('is-flipped');
             
             if (customVideoData) {
@@ -685,10 +717,25 @@
         }
         
         function setScale() { 
-            const w = window.innerWidth; const h = window.innerHeight; const scaler = document.getElementById('card-scaler'); 
+            const w = window.innerWidth; 
+            const h = window.innerHeight;
+            const scaler = document.getElementById('card-scaler'); 
             let scale = 1;
-            if(w < 550) { scale = (w - 40) / 525; }
-            if(scale < 1) scaler.style.transform = `scale(${scale})`; else scaler.style.transform = 'scale(1)'; 
+            
+            // Check Format to decide scale logic
+            const format = document.getElementById('formatSel').value;
+            const isStory = format === 'story';
+            
+            if (isStory) {
+               // Story Mode Scaling (Taller)
+               if(h < 700) scale = (h - 150) / 570; // Prioritize height fit
+               if(w < 350 && scale > (w - 20) / 320) scale = (w - 20) / 320; // Then width
+            } else {
+               // Standard Mode Scaling (Wider)
+               if(w < 550) scale = (w - 40) / 525; 
+            }
+            
+            if(scale < 1) scaler.style.transform = 'scale('+scale+')'; else scaler.style.transform = 'scale(1)'; 
         } 
         window.addEventListener('resize', setScale);
 
@@ -737,6 +784,7 @@
             const checkQR = document.getElementById('checkQR').checked;
             const themeKey = document.getElementById('pageThemeSel').value;
             const vidPreset = document.getElementById('videoPresetSel').value;
+            const format = document.getElementById('formatSel').value;
             
             const ev1T = document.getElementById('oEv1Time').innerText; const ev1N = document.getElementById('oEv1Name').innerText;
             const ev2T = document.getElementById('oEv2Time').innerText; const ev2N = document.getElementById('oEv2Name').innerText;
@@ -747,7 +795,10 @@
             const calVenue = document.getElementById('inVenue').value;
             const calDateVal = document.getElementById('inDate').value.replaceAll('-', '');
             
-            let bgCss = ''; let wrapperClass = theme; let cssVars = ''; let videoHTML = '';
+            // Format Class Injection
+            const formatClass = format === 'story' ? 'format-story' : '';
+            
+            let bgCss = ''; let wrapperClass = theme + ' ' + formatClass; let cssVars = ''; let videoHTML = '';
             if(customVideoData) {
                 const op = document.getElementById('opRange').value; const zm = document.getElementById('zoomRange').value;
                 videoHTML = `<video class="bg-video" loop muted playsinline autoplay src="${customVideoData}" style="display:block; object-position: ${bgPos.x}% ${bgPos.y}%; transform: scale(${zm/100});"></video>`;
@@ -839,7 +890,13 @@
                     const h = window.innerHeight;
                     const scaler = document.getElementById('card-scaler'); 
                     let scale = 1;
-                    if(w < 550) { scale = (w - 40) / 525; }
+                    const isStory = ${format === 'story'};
+                    if (isStory) {
+                       if(h < 700) scale = (h - 150) / 570; 
+                       if(w < 350 && scale > (w - 20) / 320) scale = (w - 20) / 320; 
+                    } else {
+                       if(w < 550) { scale = (w - 40) / 525; }
+                    }
                     if(scale < 1) scaler.style.transform = 'scale('+scale+')'; else scaler.style.transform = 'scale(1)'; 
                 } 
                 window.addEventListener('resize', setScale); setScale();
