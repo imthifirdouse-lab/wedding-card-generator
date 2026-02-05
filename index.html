@@ -357,7 +357,7 @@
                             <div class="c-content">
                                 <div class="c-top"><div class="c-logo" id="outTag">#RaNjali</div></div>
                                 <div class="c-main">
-                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">Mr. & Mrs. Sharma</span></span></div>
+                                    <div class="c-guest" id="guestRow"><i class="fas fa-envelope-open-text" style="color:inherit;"></i> <span>Special Invite for <span id="outGuest" style="border-bottom:1px dotted inherit;">${guestName}</span></span></div>
                                     <div class="c-couple" id="outName">Rahul & Anjali</div>
                                 </div>
                                 <div class="c-details">
@@ -499,22 +499,29 @@
             const themeKey = document.getElementById('pageThemeSel').value;
             const vidPreset = document.getElementById('videoPresetSel').value;
             
+            // 1. Uploaded Video
             if(customPageVideoData) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = customPageVideoData; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            } else if(customPageBgData) {
+            } 
+            // 2. Uploaded Image
+            else if(customPageBgData) {
                 vidEl.style.display = 'none'; vidEl.pause();
                 layer.style.background = `url(${customPageBgData}) no-repeat`;
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 layer.style.backgroundSize = zoom == 100 ? 'cover' : zoom + "%";
-            } else if(vidPreset) {
+            }
+            // 3. Live Video Preset
+            else if(vidPreset) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = vidPreset; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            } else if(pageThemes[themeKey]) {
+            }
+            // 4. CSS Preset
+            else if(pageThemes[themeKey]) {
                 vidEl.style.display = 'none';
                 layer.style = pageThemes[themeKey];
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
@@ -523,8 +530,11 @@
         }
 
         function updatePagePosFromSliders() {
-            pageBgPos.x = document.getElementById('pageXRange').value;
-            pageBgPos.y = document.getElementById('pageYRange').value;
+            const x = document.getElementById('pageXRange').value;
+            const y = document.getElementById('pageYRange').value;
+            pageBgPos.x = x; pageBgPos.y = y;
+            document.getElementById('pageXVal').innerText = x + "%";
+            document.getElementById('pageYVal').innerText = y + "%";
             updatePageTheme();
         }
 
@@ -643,9 +653,13 @@
                     const dx = clientX - startPos.x; const dy = clientY - startPos.y;
                     pageBgPos.x += dx * 0.2; pageBgPos.y += dy * 0.2; 
                     
-                    // Sync sliders
-                    document.getElementById('pageXRange').value = Math.min(100, Math.max(0, pageBgPos.x));
-                    document.getElementById('pageYRange').value = Math.min(100, Math.max(0, pageBgPos.y));
+                    // Clamp & Sync
+                    pageBgPos.x = Math.max(0, Math.min(100, pageBgPos.x));
+                    pageBgPos.y = Math.max(0, Math.min(100, pageBgPos.y));
+                    document.getElementById('pageXRange').value = Math.round(pageBgPos.x);
+                    document.getElementById('pageYRange').value = Math.round(pageBgPos.y);
+                    document.getElementById('pageXVal').innerText = Math.round(pageBgPos.x)+"%";
+                    document.getElementById('pageYVal').innerText = Math.round(pageBgPos.y)+"%";
                     
                     updatePageTheme(); startPos = { x: clientX, y: clientY };
                 }
