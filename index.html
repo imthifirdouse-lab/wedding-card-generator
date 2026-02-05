@@ -71,19 +71,13 @@
         #card-scaler { width: 100%; height: 100%; transform-origin: center center; display: flex; justify-content: center; align-items: center; }
         #card-floater { width: 100%; height: 100%; transform-style: preserve-3d; }
         
-        /* STANDARD (LANDSCAPE) */
         .card-wrapper { 
             width: 525px; height: 300px; position: relative; pointer-events: auto; 
-            transform-style: preserve-3d; transition: transform 0.1s linear, width 0.3s, height 0.3s; 
+            transform-style: preserve-3d; transition: transform 0.1s linear; 
             background-color: #333; background-size: cover; background-position: center;
             border-radius: 16px; cursor: grab; margin: auto;
         }
-
-        /* STORY (PORTRAIT) MODE */
-        .card-wrapper.format-story {
-            width: 320px; height: 570px;
-        }
-        
+        .card-wrapper.format-story { width: 320px; height: 570px; }
         .card-wrapper.is-dragging { cursor: grabbing; }
         .card-wrapper.flipping { transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card-wrapper.is-flipped { transform: rotateY(180deg); }
@@ -126,12 +120,12 @@
         .c-val { font-size: 11px; font-weight: 700; font-family: 'Playfair Display', serif; }
         .c-qr-box { position: absolute; bottom: 25px; right: 25px; background: white; padding: 4px; border-radius: 6px; }
 
-        /* STORY LAYOUT OVERRIDES */
+        /* STORY LAYOUT */
         .format-story .c-content { text-align: center; }
         .format-story .c-top { justify-content: center; }
         .format-story .c-main { text-align: center; margin-top: auto; margin-bottom: auto; }
         .format-story .c-guest { justify-content: center; }
-        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 80px; } /* Room for QR */
+        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 80px; }
         .format-story .c-qr-box { position: absolute; bottom: 30px; left: 50%; right: auto; transform: translateX(-50%); }
         .format-story .face-back { text-align: center; }
         .format-story .b-item { justify-content: center; }
@@ -178,6 +172,7 @@
         .btn-gold { background: linear-gradient(45deg, #d4af37, #b8860b); color: white; }
         .btn-html { background: #3b82f6; color: white; }
         .btn-cal { background: #2ecc71; color: white; }
+        .btn-vid { background: #e74c3c; color: white; width:100%; display:none; }
         
         .tap-hint { position: absolute; top: -40px; width: 100%; text-align: center; color: white; font-size: 12px; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 10; }
         
@@ -356,6 +351,7 @@
             <div class="range-label"><span>Vertical (Y)</span><span id="pageYVal">50%</span></div><input type="range" id="pageYRange" min="0" max="100" value="50" oninput="updatePagePosFromSliders()">
             <div style="font-size:9px; color:#aaa; text-align:center;">Or drag background directly</div>
         </div>
+        <button id="dlBgVideoBtn" class="btn btn-vid" onclick="downloadBgVideo()"><i class="fas fa-video"></i> Download Wallpaper Video</button>
         <button onclick="clearPageBg()" class="btn" style="background:#444; font-size:10px;">Reset Page</button>
 
         <div class="action-bar">
@@ -521,13 +517,17 @@
             const zoom = document.getElementById('pageZoomRange').value;
             const themeKey = document.getElementById('pageThemeSel').value;
             const vidPreset = document.getElementById('videoPresetSel').value;
+            const dlBtn = document.getElementById('dlBgVideoBtn');
             
+            let showDl = false;
+
             // 1. Uploaded Video
             if(customPageVideoData) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = customPageVideoData; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
+                showDl = true;
             } 
             // 2. Uploaded Image
             else if(customPageBgData) {
@@ -542,6 +542,7 @@
                 vidEl.style.display = 'block'; vidEl.src = vidPreset; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
+                showDl = true;
             }
             // 4. CSS Preset
             else if(pageThemes[themeKey]) {
@@ -549,6 +550,17 @@
                 layer.style.cssText = pageThemes[themeKey]; // Key fix: set cssText first
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`; // Then apply pos
                 if(zoom != 100) layer.style.backgroundSize = zoom + "%";
+            }
+            
+            dlBtn.style.display = showDl ? 'block' : 'none';
+        }
+
+        function downloadBgVideo() {
+            const vidPreset = document.getElementById('videoPresetSel').value;
+            if(customPageVideoData) {
+                const link = document.createElement('a'); link.href = customPageVideoData; link.download = 'Wallpaper_Video.mp4'; link.click();
+            } else if(vidPreset) {
+                window.open(vidPreset, '_blank');
             }
         }
 
@@ -726,16 +738,26 @@
             const format = document.getElementById('formatSel').value;
             const isStory = format === 'story';
             
+            // Calculate Safe Zone (Height - Top/Bottom UI space)
+            // Mobile UI often takes up ~140px (Address bar + bottom nav)
+            // Dock takes up ~80px.
+            const safeHeight = h - 160; 
+            const safeWidth = w - 40;
+
             if (isStory) {
-               // Story Mode Scaling (Taller)
-               if(h < 700) scale = (h - 150) / 570; // Prioritize height fit
-               if(w < 350 && scale > (w - 20) / 320) scale = (w - 20) / 320; // Then width
+               // Story Mode (320x570)
+               // Fit Height first
+               scale = Math.min(1, safeHeight / 570);
+               // Then check Width fit
+               if (320 * scale > safeWidth) {
+                   scale = safeWidth / 320;
+               }
             } else {
-               // Standard Mode Scaling (Wider)
-               if(w < 550) scale = (w - 40) / 525; 
+               // Standard Mode (525x300)
+               scale = Math.min(1, safeWidth / 525);
             }
             
-            if(scale < 1) scaler.style.transform = 'scale('+scale+')'; else scaler.style.transform = 'scale(1)'; 
+            scaler.style.transform = `scale(${scale})`; 
         } 
         window.addEventListener('resize', setScale);
 
@@ -892,8 +914,10 @@
                     let scale = 1;
                     const isStory = ${format === 'story'};
                     if (isStory) {
-                       if(h < 700) scale = (h - 150) / 570; 
-                       if(w < 350 && scale > (w - 20) / 320) scale = (w - 20) / 320; 
+                       const safeH = h - 160; 
+                       const safeW = w - 40;
+                       scale = Math.min(1, safeH / 570);
+                       if (320 * scale > safeW) scale = safeW / 320;
                     } else {
                        if(w < 550) { scale = (w - 40) / 525; }
                     }
