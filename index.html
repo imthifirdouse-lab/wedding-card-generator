@@ -23,7 +23,7 @@
         * { box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); display: flex; height: 100vh; margin: 0; color: var(--text); overflow: hidden; }
 
-        /* --- FIXED BACKGROUND LAYER (Mobile Fix) --- */
+        /* --- FIXED BACKGROUND LAYER --- */
         #fixed-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
             background: url('https://www.transparenttextures.com/patterns/cubes.png'), radial-gradient(circle at center, #333, #000);
@@ -329,7 +329,9 @@
         <div class="row"><input type="file" id="pageBgInput" accept="image/*" onchange="handlePageBgUpload()"><input type="file" id="pageVidInput" accept="video/*" onchange="handlePageVideoUpload()"></div>
         <div id="pagePhotoControls" style="display:none;">
             <div class="range-label"><span>Page Zoom</span><span id="pageZoomVal">Cover</span></div><input type="range" id="pageZoomRange" min="50" max="250" value="100" oninput="updatePagePhotoSettings()">
-            <div style="font-size:9px; color:#aaa; text-align:center;">Click background to drag</div>
+            <div class="range-label"><span>Horizontal (X)</span><span id="pageXVal">50%</span></div><input type="range" id="pageXRange" min="0" max="100" value="50" oninput="updatePagePosFromSliders()">
+            <div class="range-label"><span>Vertical (Y)</span><span id="pageYVal">50%</span></div><input type="range" id="pageYRange" min="0" max="100" value="50" oninput="updatePagePosFromSliders()">
+            <div style="font-size:9px; color:#aaa; text-align:center;">Or drag background directly</div>
         </div>
         <button onclick="clearPageBg()" class="btn" style="background:#444; font-size:10px;">Reset Page</button>
 
@@ -497,34 +499,33 @@
             const themeKey = document.getElementById('pageThemeSel').value;
             const vidPreset = document.getElementById('videoPresetSel').value;
             
-            // 1. Uploaded Video
             if(customPageVideoData) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = customPageVideoData; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            } 
-            // 2. Uploaded Image
-            else if(customPageBgData) {
+            } else if(customPageBgData) {
                 vidEl.style.display = 'none'; vidEl.pause();
                 layer.style.background = `url(${customPageBgData}) no-repeat`;
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 layer.style.backgroundSize = zoom == 100 ? 'cover' : zoom + "%";
-            }
-            // 3. Live Video Preset
-            else if(vidPreset) {
+            } else if(vidPreset) {
                 layer.style.background = 'black';
                 vidEl.style.display = 'block'; vidEl.src = vidPreset; vidEl.play();
                 vidEl.style.objectPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 vidEl.style.transform = `scale(${zoom/100})`;
-            }
-            // 4. CSS Preset
-            else if(pageThemes[themeKey]) {
+            } else if(pageThemes[themeKey]) {
                 vidEl.style.display = 'none';
                 layer.style = pageThemes[themeKey];
                 layer.style.backgroundPosition = `${pageBgPos.x}% ${pageBgPos.y}%`;
                 if(zoom != 100) layer.style.backgroundSize = zoom + "%";
             }
+        }
+
+        function updatePagePosFromSliders() {
+            pageBgPos.x = document.getElementById('pageXRange').value;
+            pageBgPos.y = document.getElementById('pageYRange').value;
+            updatePageTheme();
         }
 
         function updatePhotoSettings() {
@@ -641,6 +642,11 @@
                 else if (isDraggingPage) {
                     const dx = clientX - startPos.x; const dy = clientY - startPos.y;
                     pageBgPos.x += dx * 0.2; pageBgPos.y += dy * 0.2; 
+                    
+                    // Sync sliders
+                    document.getElementById('pageXRange').value = Math.min(100, Math.max(0, pageBgPos.x));
+                    document.getElementById('pageYRange').value = Math.min(100, Math.max(0, pageBgPos.y));
+                    
                     updatePageTheme(); startPos = { x: clientX, y: clientY };
                 }
                 else if(!document.getElementById('checkLoop').checked && !isDraggingCard && !isDraggingPage) {
