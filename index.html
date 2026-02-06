@@ -36,7 +36,7 @@
         }
 
         /* --- CONTROLS --- */
-        .input-panel { width: 420px; background: var(--panel); padding: 30px; overflow-y: auto; border-right: 1px solid #444; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 10; position: relative; }
+        .input-panel { width: 420px; background: var(--panel); padding: 30px; overflow-y: auto; border-right: 1px solid #444; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 10; position: relative; transition: transform 0.3s; }
         .brand { font-family: 'Playfair Display', serif; font-size: 26px; color: #d4af37; letter-spacing: 1px; margin-bottom: 5px; }
         .subtitle { font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 25px; letter-spacing: 2px; }
         .section-title { font-size: 10px; font-weight: 700; color: #d4af37; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -127,10 +127,8 @@
         .format-story .c-top { justify-content: center; }
         .format-story .c-main { text-align: center; margin-top: auto; margin-bottom: auto; }
         .format-story .c-guest { justify-content: center; }
-        /* Add bottom margin to avoid dock overlap */
-        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 100px; }
-        /* Move QR higher up */
-        .format-story .c-qr-box { position: absolute; bottom: 40px; left: 50%; right: auto; transform: translateX(-50%); }
+        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 80px; }
+        .format-story .c-qr-box { position: absolute; bottom: 30px; left: 50%; right: auto; transform: translateX(-50%); }
         .format-story .face-back { text-align: center; }
         .format-story .b-item { justify-content: center; }
 
@@ -180,6 +178,11 @@
         
         .tap-hint { position: absolute; top: -40px; width: 100%; text-align: center; color: white; font-size: 12px; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 10; }
         
+        /* Hiding UI for recording */
+        .recording-mode .input-panel, .recording-mode .guest-dock, .recording-mode .tap-hint, .recording-mode .action-bar { display: none !important; }
+        .recording-mode .preview-panel { cursor: none; }
+        .recording-mode #exitRecBtn { display: block !important; }
+
         .guest-dock { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); 
             display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 400px; justify-content: center;
@@ -223,6 +226,10 @@
     <audio id="bgMusic" loop>
         <source src="https://actions.google.com/sounds/v1/ambiences/wind_chimes.ogg" type="audio/ogg">
     </audio>
+    
+    <button id="exitRecBtn" onclick="stopRecordingMode()" style="display:none; position:fixed; top:20px; left:20px; z-index:9999; background:rgba(231, 76, 60, 0.8); color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;">
+        <i class="fas fa-stop"></i> Stop / Exit
+    </button>
 
     <div class="input-panel">
         <div class="brand">LuxeInvite<span style="font-size:12px; vertical-align:top;">®</span></div>
@@ -796,23 +803,24 @@
             const format = document.getElementById('formatSel').value;
             const isStory = format === 'story';
             
-            // Safe Height: Viewport - (Top Header + Bottom Dock Padding)
-            // Mobile UI ~120px + Dock ~80px = ~200px buffer
-            const safeHeight = h - 200; 
+            // Calculate Safe Zone (Height - Top/Bottom UI space)
+            // Mobile UI often takes up ~140px (Address bar + bottom nav)
+            // Dock takes up ~80px.
+            const safeHeight = h - 160; 
             const safeWidth = w - 40;
 
             if (isStory) {
-               // Portrait Mode: Fit height first
+               // Story Mode (320x570)
+               // Fit Height first
                scale = Math.min(1, safeHeight / 570);
-               // Then width check
-               if (320 * scale > safeWidth) scale = safeWidth / 320;
+               // Then check Width fit
+               if (320 * scale > safeWidth) {
+                   scale = safeWidth / 320;
+               }
             } else {
-               // Landscape Mode: Fit width first
+               // Standard Mode (525x300)
                scale = Math.min(1, safeWidth / 525);
             }
-            
-            // Prevent negative scale
-            scale = Math.max(0.1, scale);
             
             scaler.style.transform = `scale(${scale})`; 
         } 
@@ -919,10 +927,24 @@
                         if(audio.paused) clearInterval(check);
                     }, 100);
                 }
+                
+                // Force play on first interaction (Mobile Safari/Chrome fix)
+                document.body.addEventListener('click', function() {
+                    if(audio.paused) toggleAudio();
+                }, { once: true });
                 `;
             }
 
-            return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${styles} body{margin:0;overflow:hidden;} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss} ${pageBgStyle}</style></head><body>
+            // --- Z-INDEX FIX: Ensuring video is behind text ---
+            const finalStyles = styles + `
+                .card-face { z-index: 1; } 
+                .bg-video { z-index: -1 !important; position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+                .c-content { z-index: 10; position:relative; }
+                .custom-bg-overlay { z-index: 1; }
+            `;
+
+            return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"><title>${name}</title><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&family=Great+Vibes&family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>${finalStyles} body{margin:0;overflow:hidden;} .input-panel{display:none} .preview-panel{width:100vw;height:100dvh;margin:0;padding:0;} .card-scene{width:90%;max-width:525px} ${cssVars} ${bgCss} ${pageBgStyle}</style></head><body>
+            <div id="loading" style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:gold;display:flex;justify-content:center;align-items:center;z-index:9999;">Loading Luxe Card...</div>
             ${pageVideoHTML || '<div id="fixed-layer"></div>'}
             ${audioHTML}
             <div class="preview-panel">
@@ -956,6 +978,7 @@
                 </div>
             </div>
             <script>
+                window.onload = function() { document.getElementById('loading').style.display='none'; }
                 ${audioScript}
                 new QRCode(document.getElementById("qrcode"), { text: "${link}", width: 70, height: 70, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.L });
                 function addToCalendar() {
@@ -976,7 +999,7 @@
                        scale = Math.min(1, safeH / 570);
                        if (320 * scale > safeW) scale = safeW / 320;
                     } else {
-                       if(w < 550) { scale = (w - 40) / 525; }
+                       if(w < 550) scale = (w - 40) / 525; 
                     }
                     if(scale < 1) scaler.style.transform = 'scale('+scale+')'; else scaler.style.transform = 'scale(1)'; 
                 } 
