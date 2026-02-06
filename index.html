@@ -36,7 +36,7 @@
         }
 
         /* --- CONTROLS --- */
-        .input-panel { width: 420px; background: var(--panel); padding: 30px; overflow-y: auto; border-right: 1px solid #444; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 10; position: relative; transition: transform 0.3s; }
+        .input-panel { width: 420px; background: var(--panel); padding: 30px; overflow-y: auto; border-right: 1px solid #444; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 10; position: relative; }
         .brand { font-family: 'Playfair Display', serif; font-size: 26px; color: #d4af37; letter-spacing: 1px; margin-bottom: 5px; }
         .subtitle { font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 25px; letter-spacing: 2px; }
         .section-title { font-size: 10px; font-weight: 700; color: #d4af37; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -127,8 +127,10 @@
         .format-story .c-top { justify-content: center; }
         .format-story .c-main { text-align: center; margin-top: auto; margin-bottom: auto; }
         .format-story .c-guest { justify-content: center; }
-        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 80px; }
-        .format-story .c-qr-box { position: absolute; bottom: 30px; left: 50%; right: auto; transform: translateX(-50%); }
+        /* Add bottom margin to avoid dock overlap */
+        .format-story .c-details { flex-direction: column; width: 100%; border-top: none; gap: 15px; margin-bottom: 100px; }
+        /* Move QR higher up */
+        .format-story .c-qr-box { position: absolute; bottom: 40px; left: 50%; right: auto; transform: translateX(-50%); }
         .format-story .face-back { text-align: center; }
         .format-story .b-item { justify-content: center; }
 
@@ -178,11 +180,6 @@
         
         .tap-hint { position: absolute; top: -40px; width: 100%; text-align: center; color: white; font-size: 12px; opacity: 0; transition: 0.5s; pointer-events: none; z-index: 10; }
         
-        /* Hiding UI for recording */
-        .recording-mode .input-panel, .recording-mode .guest-dock, .recording-mode .tap-hint, .recording-mode .action-bar { display: none !important; }
-        .recording-mode .preview-panel { cursor: none; }
-        .recording-mode #exitRecBtn { display: block !important; }
-
         .guest-dock { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); 
             display: flex; gap: 10px; z-index: 100; width: 90%; max-width: 400px; justify-content: center;
@@ -203,9 +200,21 @@
             .input-panel { display: none; }
             .preview-panel { height: 100dvh; } 
         }
+        
+        /* Render Processing State */
+        .rendering-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center; color: #d4af37;
+        }
     </style>
 </head>
 <body onload="init()">
+
+    <div id="render-msg" class="rendering-overlay">
+        <i class="fas fa-spinner fa-spin" style="font-size:40px; margin-bottom:15px;"></i>
+        <div>RENDERING VIDEO...</div>
+        <div style="font-size:12px; color:#aaa; margin-top:5px;">Please wait while we compose frames</div>
+    </div>
 
     <div id="fixed-layer">
         <video id="pageBgVideoEl" loop muted playsinline autoplay></video>
@@ -214,10 +223,6 @@
     <audio id="bgMusic" loop>
         <source src="https://actions.google.com/sounds/v1/ambiences/wind_chimes.ogg" type="audio/ogg">
     </audio>
-    
-    <button id="exitRecBtn" onclick="stopRecordingMode()" style="display:none; position:fixed; top:20px; left:20px; z-index:9999; background:rgba(231, 76, 60, 0.8); color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;">
-        <i class="fas fa-stop"></i> Stop / Exit
-    </button>
 
     <div class="input-panel">
         <div class="brand">LuxeInvite<span style="font-size:12px; vertical-align:top;">®</span></div>
@@ -365,7 +370,7 @@
         <button onclick="clearPageBg()" class="btn" style="background:#444; font-size:10px;">Reset Page</button>
 
         <div class="action-bar">
-            <button onclick="startRecordMode()" class="btn btn-rec"><i class="fas fa-video"></i> Record Video (Beta)</button>
+            <button onclick="downloadCardVideo()" class="btn btn-rec"><i class="fas fa-video"></i> Render Video (BETA)</button>
             <button class="btn btn-gold" onclick="downloadPNG()"><i class="fas fa-image"></i> Save PNG</button>
             <button class="btn btn-html" id="dlBtn" onclick="downloadHTML()"><i class="fas fa-bolt"></i> Save Live Card</button>
         </div>
@@ -424,7 +429,7 @@
         let customPageBgData = null; let customPageVideoData = null;
         let bgPos = { x: 50, y: 50 }; let pageBgPos = { x: 50, y: 50 };
         let isDraggingCard = false; let isDraggingPage = false; let startPos = { x:0, y:0 };
-        let mediaRecorder; let recordedChunks = [];
+        let isRecording = false;
         
         // Music Vars
         let musicData = null;
@@ -455,50 +460,61 @@
             updateCard(); initInteractions(); setScale(); 
         }
 
-        // --- RECORDING LOGIC ---
-        async function startRecordMode() {
-            document.body.classList.add('recording-mode');
+        // --- RENDER VIDEO LOGIC ---
+        async function downloadCardVideo() {
+            if(!customVideoData) { alert("This feature is designed for cards with VIDEO backgrounds. For static images, please use 'Save PNG'."); return; }
             
-            // Check if user is on mobile (approximate check)
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            if (!isMobile && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-                try {
-                    const stream = await navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'browser' }, audio: true });
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-                    
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) recordedChunks.push(event.data);
-                    };
-                    
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.style.display = 'none'; a.href = url; a.download = 'Luxe_Invite.webm';
-                        document.body.appendChild(a); a.click();
-                        window.URL.revokeObjectURL(url);
-                        stopRecordingMode(); // Auto exit
-                    };
-                    
-                    recordedChunks = [];
-                    mediaRecorder.start();
-                    
-                    // Auto stop after 10s or when stream ends
-                    setTimeout(() => { if(mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 10000);
-                    
-                } catch (err) {
-                    console.error("Error: " + err);
-                    alert("Could not start auto-recording. Please use your system screen recorder.");
-                }
-            } else {
-                alert("Mobile/iOS detected: Auto-recording is blocked by the OS.\n\nMode Active: Controls hidden.\n\nPlease open your phone's CONTROL CENTER and start Screen Recording now.");
-            }
-        }
+            // 1. Show UI
+            document.getElementById('render-msg').style.display = 'flex';
+            isRecording = true;
 
-        function stopRecordingMode() {
-            document.body.classList.remove('recording-mode');
-            if(mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+            // 2. Prepare Elements
+            const cardFace = document.querySelector(".card-face.face-front");
+            const vidEl = document.getElementById('bgVideo');
+            const prevDisplay = vidEl.style.display;
+            
+            // 3. Snapshot Overlay (Text/QR)
+            vidEl.style.display = 'none'; // Hide video to capture text only
+            const overlayCanvas = await html2canvas(cardFace, { backgroundColor: null, scale: 2 });
+            vidEl.style.display = prevDisplay;
+
+            // 4. Setup Recording Canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = overlayCanvas.width;
+            canvas.height = overlayCanvas.height;
+            const ctx = canvas.getContext("2d");
+
+            // 5. Start Recording
+            const stream = canvas.captureStream(30);
+            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            const chunks = [];
+            
+            recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+            recorder.onstop = () => {
+                isRecording = false;
+                document.getElementById('render-msg').style.display = 'none';
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none'; a.href = url; a.download = 'Luxe_Card_Video.webm';
+                document.body.appendChild(a); a.click();
+            };
+
+            recorder.start();
+            vidEl.currentTime = 0;
+            vidEl.play();
+
+            // 6. Draw Loop
+            const draw = () => {
+                if (!isRecording) return;
+                ctx.drawImage(vidEl, 0, 0, canvas.width, canvas.height); // Draw Video
+                ctx.drawImage(overlayCanvas, 0, 0); // Draw Text Overlay
+                requestAnimationFrame(draw);
+            };
+            draw();
+
+            // 7. Stop after 10s
+            setTimeout(() => { if(recorder.state === 'recording') recorder.stop(); }, 10000);
         }
 
         // --- Interaction Logic ---
@@ -780,24 +796,23 @@
             const format = document.getElementById('formatSel').value;
             const isStory = format === 'story';
             
-            // Calculate Safe Zone (Height - Top/Bottom UI space)
-            // Mobile UI often takes up ~140px (Address bar + bottom nav)
-            // Dock takes up ~80px.
-            const safeHeight = h - 160; 
+            // Safe Height: Viewport - (Top Header + Bottom Dock Padding)
+            // Mobile UI ~120px + Dock ~80px = ~200px buffer
+            const safeHeight = h - 200; 
             const safeWidth = w - 40;
 
             if (isStory) {
-               // Story Mode (320x570)
-               // Fit Height first
+               // Portrait Mode: Fit height first
                scale = Math.min(1, safeHeight / 570);
-               // Then check Width fit
-               if (320 * scale > safeWidth) {
-                   scale = safeWidth / 320;
-               }
+               // Then width check
+               if (320 * scale > safeWidth) scale = safeWidth / 320;
             } else {
-               // Standard Mode (525x300)
+               // Landscape Mode: Fit width first
                scale = Math.min(1, safeWidth / 525);
             }
+            
+            // Prevent negative scale
+            scale = Math.max(0.1, scale);
             
             scaler.style.transform = `scale(${scale})`; 
         } 
@@ -956,7 +971,7 @@
                     let scale = 1;
                     const isStory = ${format === 'story'};
                     if (isStory) {
-                       const safeH = h - 160; 
+                       const safeH = h - 200; 
                        const safeW = w - 40;
                        scale = Math.min(1, safeH / 570);
                        if (320 * scale > safeW) scale = safeW / 320;
